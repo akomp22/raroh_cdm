@@ -48,9 +48,9 @@ if __name__ == "__main__":
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out_frame = cv2.VideoWriter("camera_output.avi", fourcc, 20.0, (width, height))
     out_mask = cv2.VideoWriter("mask_output.avi", fourcc, 20.0, (width, height), isColor=False)
-
+    frame_count = 0
     try:
-        while True:
+        while frame_count<400:
             ret, frame = cam.get_frame()
             if not ret:
                 print("Error reading frame")
@@ -67,6 +67,7 @@ if __name__ == "__main__":
             # Save original and mask
             out_frame.write(frame)
             out_mask.write(mask_cleaned)
+            frame_count = frame_count + 1
 
             # # Optional: Show live preview
             # cv2.imshow("Camera Frame", frame)
