@@ -32,6 +32,7 @@ if __name__ == '__main__':
         if coord is None:
             dx = 0
             dy = 0
+            coord = (-1,-1)
         else:
             dx = image_x_center - coord[0]
             dy = image_y_center - coord[1]
