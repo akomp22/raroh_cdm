@@ -7,8 +7,8 @@ def find_red_spot_center(frame):
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     print(frame.shape)
     # Define red color range in RGB
-    lower_red = np.array([190, 0, 0])
-    upper_red = np.array([255, 200, 200])
+    lower_red = np.array([170, 0, 0])
+    upper_red = np.array([255, 150, 150])
 
     # Create a mask for red regions
     mask = cv2.inRange(rgb, lower_red, upper_red)
