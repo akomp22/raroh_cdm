@@ -33,7 +33,7 @@ def find_red_spot_center(frame):
 if __name__ == "__main__":
     import sys
     import time
-    cam = Camera(type="jetson", video_path=None, camera_id=0)
+    cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
 
     ret, frame = cam.get_frame()
     if not ret:
