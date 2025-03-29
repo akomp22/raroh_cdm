@@ -47,8 +47,9 @@ if __name__ == "__main__":
             if not ret:
                 print("Error reading frame")
                 break
-
+            
             coord, mask_cleaned = find_red_spot_center(frame)
+            print(np.max(frame))
             print(coord)
 
             # Draw a circle at the red spot center (if found)
