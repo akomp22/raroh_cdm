@@ -5,7 +5,6 @@ from camera import Camera
 def find_red_spot_center(frame):
     # Convert to RGB (OpenCV loads in BGR by default)
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    print(frame.shape)
     # Define red color range in RGB
     lower_red = np.array([170, 0, 0])
     upper_red = np.array([255, 100, 100])
