@@ -35,8 +35,8 @@ if __name__ == '__main__':
             dy = 0
             coord = (-1,-1)
         else:
-            dx = image_x_center - dx
-            dy = image_y_center - dy
+            dx = image_x_center - coord[0]
+            dy = image_y_center - coord[0]
         cmd_x = pid_x.get_command(setpoint = 0,current_value = dx,current_time = time.time())
         cmd_y = pid_y.get_command(setpoint = 0,current_value = dy,current_time = time.time())
 
