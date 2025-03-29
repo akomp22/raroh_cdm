@@ -14,8 +14,8 @@ if __name__ == '__main__':
     # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_ATTITUDE, 1)
     cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
 
-    pid_x = PID_FF_controller(Kp = 100, Ki = 0,Kd = 0, Kff = 0, i_max = 1, min_cmd = 1000, max_cmd = 2000)
-    pid_y = PID_FF_controller(Kp = 100, Ki = 0, Kd = 0, Kff = 0, i_max = 1, min_cmd = 1000, max_cmd = 2000)
+    pid_x = PID_FF_controller(Kp = 1, Ki = 0,Kd = 0, Kff = 0, i_max = 1, min_cmd = -100000, max_cmd = 200000)
+    pid_y = PID_FF_controller(Kp = 1, Ki = 0, Kd = 0, Kff = 0, i_max = 1, min_cmd = -100000, max_cmd = 200000)
 
     ret, frame = cam.get_frame()
     if not ret:
@@ -39,11 +39,11 @@ if __name__ == '__main__':
         cmd_x = pid_x.get_command(setpoint = 0,current_value = dx,current_time = time.time())
         cmd_y = pid_y.get_command(setpoint = 0,current_value = dy,current_time = time.time())
 
-        cmd_x = 1500+cmd_x
-        cmd_y = 1500+cmd_y
+        # cmd_x = 1500+cmd_x
+        # cmd_y = 1500+cmd_y
         print(image_x_center, image_y_center, dx, dy)
         print(f"target x {coord[0]} target y{coord[1]}; dx {dx} dy {dy} cmd x {cmd_x}; cmd y {cmd_y}")
-        mavlink_wrapper.set_rc_channel_pwm(channel_id = 1, pwm=cmd_x)
-        mavlink_wrapper.set_rc_channel_pwm(channel_id = 0, pwm=cmd_y)
+        # mavlink_wrapper.set_rc_channel_pwm(channel_id = 1, pwm=cmd_x)
+        # mavlink_wrapper.set_rc_channel_pwm(channel_id = 0, pwm=cmd_y)
 
 
