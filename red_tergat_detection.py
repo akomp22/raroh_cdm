@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from camera import Camera 
+from camera import Camera
 
 def find_red_spot_center(frame):
     # Convert to RGB (OpenCV loads in BGR by default)
@@ -32,7 +32,7 @@ def find_red_spot_center(frame):
 
 if __name__ == "__main__":
     import sys
-    import time
+
     cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
 
     ret, frame = cam.get_frame()
@@ -41,26 +41,36 @@ if __name__ == "__main__":
         cam.release()
         sys.exit(1)
 
+    # Get video dimensions
+    height, width = frame.shape[:2]
+
+    # Define video writers
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out_frame = cv2.VideoWriter("camera_output.avi", fourcc, 20.0, (width, height))
+    out_mask = cv2.VideoWriter("mask_output.avi", fourcc, 20.0, (width, height), isColor=False)
+
     try:
         while True:
             ret, frame = cam.get_frame()
             if not ret:
                 print("Error reading frame")
                 break
-            
+
             coord, mask_cleaned = find_red_spot_center(frame)
             print(np.max(frame))
             print(coord)
 
-            # Draw a circle at the red spot center (if found)
-            # if coord:
-            #     cv2.circle(frame, coord, 5, (0, 255, 0), -1)
+            # Optional: Draw a dot where the red spot is
+            if coord:
+                cv2.circle(frame, coord, 5, (0, 255, 0), -1)
 
-            # # Show the original frame and mask
+            # Save original and mask
+            out_frame.write(frame)
+            out_mask.write(mask_cleaned)
+
+            # # Optional: Show live preview
             # cv2.imshow("Camera Frame", frame)
             # cv2.imshow("Red Mask", mask_cleaned)
-
-            # # Exit if 'q' is pressed
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
 
@@ -69,4 +79,6 @@ if __name__ == "__main__":
 
     finally:
         cam.release()
+        out_frame.release()
+        out_mask.release()
         cv2.destroyAllWindows()
