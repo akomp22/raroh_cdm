@@ -12,7 +12,7 @@ if __name__ == '__main__':
     mavlink_wrapper.connect()
     mavlink_wrapper.run_telemetry_parralel()
     # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_ATTITUDE, 1)
-    cam = Camera(type="jetson", video_path=None, camera_id=0)
+    cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
 
     pid_x = PID_FF_controller(Kp = 1, Ki = 1,Kd = 0, Kff = 0, i_max = 1, min_cmd = 1000, max_cmd = 2000)
     pid_y = PID_FF_controller(Kp = 1, Ki = 1, Kd = 0, Kff = 0, i_max = 1, min_cmd = 1000, max_cmd = 2000)
