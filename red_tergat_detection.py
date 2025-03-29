@@ -52,16 +52,16 @@ if __name__ == "__main__":
             print(coord)
 
             # Draw a circle at the red spot center (if found)
-            if coord:
-                cv2.circle(frame, coord, 5, (0, 255, 0), -1)
+            # if coord:
+            #     cv2.circle(frame, coord, 5, (0, 255, 0), -1)
 
-            # Show the original frame and mask
-            cv2.imshow("Camera Frame", frame)
-            cv2.imshow("Red Mask", mask_cleaned)
+            # # Show the original frame and mask
+            # cv2.imshow("Camera Frame", frame)
+            # cv2.imshow("Red Mask", mask_cleaned)
 
-            # Exit if 'q' is pressed
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            # # Exit if 'q' is pressed
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+            #     break
 
     except KeyboardInterrupt:
         print("\nRecording interrupted by user.")
