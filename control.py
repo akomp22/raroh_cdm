@@ -35,7 +35,7 @@ if __name__ == '__main__':
             dy = 0
         else:
             dx = coord[0]
-            dy = coord[0]
+            dy = coord[1]
         cmd_x = pid_x.get_command(setpoint = 0,current_value = dx,current_time = time.time())
         cmd_y = pid_y.get_command(setpoint = 0,current_value = dy,current_time = time.time())
 
