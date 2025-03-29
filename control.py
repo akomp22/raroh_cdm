@@ -30,6 +30,7 @@ if __name__ == '__main__':
             break
         coord, mask_cleaned = find_red_spot_center(frame)
         if coord is None:
+            print(coord)
             dx = 0
             dy = 0
             coord = (-1,-1)
@@ -38,10 +39,10 @@ if __name__ == '__main__':
             dy = image_y_center - dy
         cmd_x = pid_x.get_command(setpoint = 0,current_value = dx,current_time = time.time())
         cmd_y = pid_y.get_command(setpoint = 0,current_value = dy,current_time = time.time())
-        print(f"target x {coord[0]} target y{coord[1]}; dx {dx} dy {dy} cmd x {cmd_x}; cmd y {cmd_y}")
 
         cmd_x = 1500+cmd_x
         cmd_y = 1500+cmd_y
+        print(f"target x {coord[0]} target y{coord[1]}; dx {dx} dy {dy} cmd x {cmd_x}; cmd y {cmd_y}")
         mavlink_wrapper.set_rc_channel_pwm(channel_id = 1, pwm=cmd_x)
         mavlink_wrapper.set_rc_channel_pwm(channel_id = 0, pwm=cmd_y)
 
