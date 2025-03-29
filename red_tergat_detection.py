@@ -3,28 +3,24 @@ import numpy as np
 from camera import Camera
 
 def find_red_spot_center(frame):
-    # Convert to HSV
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # Convert to RGB (OpenCV loads in BGR by default)
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    # Red hue wraps around, so use two ranges
-    lower_red1 = np.array([0, 100, 100])
-    upper_red1 = np.array([10, 255, 255])
+    # Define red color range in RGB
+    lower_red = np.array([70, 0, 0])
+    upper_red = np.array([255, 200, 200])
 
-    lower_red2 = np.array([160, 100, 100])
-    upper_red2 = np.array([179, 255, 255])
+    # Create a mask for red regions
+    mask = cv2.inRange(rgb, lower_red, upper_red)
 
-    # Combine masks
-    mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-    mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-    mask = cv2.bitwise_or(mask1, mask2)
-
-    # Clean mask
+    # Morphological operations to reduce noise
     kernel = np.ones((5, 5), np.uint8)
     mask_cleaned = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
     mask_cleaned = cv2.morphologyEx(mask_cleaned, cv2.MORPH_DILATE, kernel)
 
-    # Find largest red blob
+    # Find contours
     contours, _ = cv2.findContours(mask_cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
     if contours:
         largest = max(contours, key=cv2.contourArea)
         M = cv2.moments(largest)
@@ -38,24 +34,15 @@ if __name__ == "__main__":
     import sys
 
     cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
-    
-    # Get video dimensions
-    # Get first valid frame
+
     ret, frame = cam.get_frame()
     if not ret:
         print("Error: Could not read first frame.")
         cam.release()
         sys.exit(1)
 
+    # Get video dimensions
     height, width = frame.shape[:2]
-
-    # Make sure frames are in the expected format
-    frame_size = (width, height)
-
-    # Define writers (match size, correct flags)
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out_frame = cv2.VideoWriter("camera_output.avi", fourcc, 20.0, frame_size, isColor=True)
-    out_mask = cv2.VideoWriter("mask_output.avi", fourcc, 20.0, frame_size, isColor=False)
 
     # Define video writers
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
