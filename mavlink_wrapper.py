@@ -3,7 +3,7 @@ import pymavlink.dialects.v20.all as dialects
 import time
 from multiprocessing import Process, Manager, Event  
 import numpy as np
-from utils import *
+# from utils import *
 import copy
 
 def to_quaternion(roll=0.0, pitch=0.0, yaw=0.0):
