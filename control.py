@@ -38,7 +38,7 @@ if __name__ == '__main__':
             dy = image_y_center - coord[1]
         cmd_x = pid_x.get_command(setpoint = 0,current_value = dx,current_time = time.time())
         cmd_y = pid_y.get_command(setpoint = 0,current_value = dy,current_time = time.time())
-        print(f"target x:{coord[0]} target y{coord[1]}; cmd x: {cmd_x}; cmd y: {cmd_y}")
+        print(f"target x {coord[0]} target y{coord[1]}; dx {dx} dy {dy} cmd x {cmd_x}; cmd y {cmd_y}")
 
         mavlink_wrapper.set_rc_channel_pwm(channel_id = 1, pwm=cmd_x)
         mavlink_wrapper.set_rc_channel_pwm(channel_id = 0, pwm=cmd_y)

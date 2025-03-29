@@ -5,6 +5,7 @@ from camera import Camera
 def find_red_spot_center(frame):
     # Convert to RGB (OpenCV loads in BGR by default)
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
     # Define red color range in RGB
     lower_red = np.array([170, 0, 0])
     upper_red = np.array([255, 100, 100])
@@ -26,7 +27,17 @@ def find_red_spot_center(frame):
         if M["m00"] != 0:
             cx = int(M["m10"] / M["m00"])
             cy = int(M["m01"] / M["m00"])
-            return (cx, cy), mask_cleaned
+
+            # Calculate image center
+            height, width = frame.shape[:2]
+            center_x = width // 2
+            center_y = height // 2
+
+            # Calculate relative position (dx, dy)
+            dx = cx - center_x
+            dy = cy - center_y
+
+            return (dx, dy), mask_cleaned  # Offset from center
     return None, mask_cleaned
 
 if __name__ == "__main__":
