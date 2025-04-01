@@ -44,7 +44,7 @@ if __name__ == '__main__':
         cmd_y = 1500+cmd_y
         print(image_x_center, image_y_center, dx, dy)
         print(f"target x {coord[0]} target y{coord[1]}; dx {dx} dy {dy} cmd x {cmd_x}; cmd y {cmd_y}")
-        mavlink_wrapper.set_rc_channel_pwm(channel_id = 1, pwm=cmd_x)
-        mavlink_wrapper.set_rc_channel_pwm(channel_id = 2, pwm=cmd_y)
+        mavlink_wrapper.set_rc_channel_pwm(channel_id = 1, pwm=int(cmd_x))
+        mavlink_wrapper.set_rc_channel_pwm(channel_id = 2, pwm=int(cmd_y))
 
 
