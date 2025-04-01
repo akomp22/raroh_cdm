@@ -1071,26 +1071,32 @@ class MavlinkWrapper:
             
 
 
-def main():
-    connection_string = '/dev/ttyACM0'  
-    # connection_string = "udpin:localhost:14551"
-    mavlink_wrapper = MavlinkWrapper(connection_string)
-    mavlink_wrapper.connect()
-    mavlink_wrapper.run_telemetry_parralel()
-    mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_ATTITUDE, 1)
-    time.sleep(3)
-    t1 = time.time()
-    while True:
-        attitude = mavlink_wrapper.messages["ATTITUDE"]
-        print(np.rad2deg(attitude.roll), time.time()-t1)
-        t1 = time.time()
-    #     if time.time() - t1>10:
-    #         break
-    time.sleep(10)
-    if mavlink_wrapper.parralel_telemetry:
-        mavlink_wrapper.stop_telemetry_process()
-    mavlink_wrapper.connection.close()
-    # connection.close()
+# def main():
+#     connection_string = 'COM13'  
+#     # connection_string = "udpin:localhost:14551"
+#     mavlink_wrapper = MavlinkWrapper('COM13')
+#     mavlink_wrapper.connect()
+#     mavlink_wrapper.run_telemetry()
+#     # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_ATTITUDE, 1)
+#     # time.sleep(3)
+#     # t1 = time.time()
+#     while True:
+#         mavlink_wrapper.set_rc_channel_pwm(channel_id = 1, pwm=1100)
+#         read_rc_channel = mavlink_wrapper.read_rc_channel(1)
+#         print(read_rc_channel)
 
 if __name__ == "__main__":
-    main()
+    connection_string = 'COM19'  
+    # connection_string = "udpin:localhost:14551"
+    source_system = 255
+    mavlink_wrapper = MavlinkWrapper(connection_string, source_system=source_system)
+    mavlink_wrapper.connect()
+    # mavlink_wrapper.run_telemetry_parralel()
+    mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_RC_CHANNELS, 1)
+    # mavlink_wrapper.set_mode('MANUAL')
+    while True:
+        mavlink_wrapper.set_rc_channel_pwm(1,1800)
+        msg = mavlink_wrapper.connection.recv_match(type='RC_CHANNELS', blocking=True, timeout=0.1)
+        if msg:
+            print(f"RC1={msg.chan1_raw}; RC2={msg.chan2_raw}; RC3={msg.chan3_raw}; RC3={msg.chan4_raw}")
+        time.sleep(0.1)

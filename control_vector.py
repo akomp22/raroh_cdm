@@ -1,0 +1,50 @@
+from mavlink_wrapper import MavlinkWrapper
+from camera import Camera
+from pymavlink import mavutil
+from red_tergat_detection import find_red_spot_center
+from pid_ff_controller import PIDFFController
+import time
+
+if __name__ == '__main__':
+    connection_string = '/dev/ttyACM0'  
+    source_system = 255
+    # connection_string = "udpin:localhost:14551"
+    mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system)
+    mavlink_wrapper.connect()
+    mavlink_wrapper.run_telemetry_parralel()
+    # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_ATTITUDE, 1)
+    cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
+
+    pid_x = PIDFFController(Kp = 2, Ki = 0,Kd = 0, Kff = 0, i_max = 1, min_cmd = -500, max_cmd = 500)
+    pid_y = PIDFFController(Kp = 2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, min_cmd = -500, max_cmd = 500)
+
+    ret, frame = cam.get_frame()
+    if not ret:
+        print("Error reading frame")
+    image_y_center = frame.shape[0]/2
+    image_x_center = frame.shape[1]/2
+    
+    while True:
+        ret, frame = cam.get_frame()
+        if not ret:
+            print("Error reading frame")
+            break
+        coord, mask_cleaned = find_red_spot_center(frame)
+        if coord is None:
+            coord = (-1,-1)
+            dx = 0
+            dy = 0
+        else:
+            dx = coord[0]
+            dy = coord[1]
+        cmd_x = pid_x.get_command(setpoint = 0,current_value = dx,current_time = time.time())
+        cmd_y = pid_y.get_command(setpoint = 0,current_value = dy,current_time = time.time())
+
+        cmd_x = 1500+cmd_x
+        cmd_y = 1500+cmd_y
+        print(image_x_center, image_y_center, dx, dy)
+        print(f"target x {coord[0]} target y{coord[1]}; dx {dx} dy {dy} cmd x {cmd_x}; cmd y {cmd_y}")
+        # mavlink_wrapper.set_rc_channel_pwm(channel_id = 1, pwm=cmd_x)
+        # mavlink_wrapper.set_rc_channel_pwm(channel_id = 0, pwm=cmd_y)
+
+

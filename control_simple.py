@@ -2,20 +2,21 @@ from mavlink_wrapper import MavlinkWrapper
 from camera import Camera
 from pymavlink import mavutil
 from red_tergat_detection import find_red_spot_center
-from pid_ff_controller import PID_FF_controller
+from pid_ff_controller import PIDFFController
 import time
 
 if __name__ == '__main__':
     connection_string = '/dev/ttyACM0'  
+    source_system = 255
     # connection_string = "udpin:localhost:14551"
-    mavlink_wrapper = MavlinkWrapper(connection_string)
+    mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system)
     mavlink_wrapper.connect()
     mavlink_wrapper.run_telemetry_parralel()
     # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_ATTITUDE, 1)
     cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
 
-    pid_x = PID_FF_controller(Kp = 2, Ki = 0,Kd = 0, Kff = 0, i_max = 1, min_cmd = -500, max_cmd = 500)
-    pid_y = PID_FF_controller(Kp = 2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, min_cmd = -500, max_cmd = 500)
+    pid_x = PIDFFController(Kp = 2, Ki = 0,Kd = 0, Kff = 0, i_max = 1, min_cmd = -500, max_cmd = 500)
+    pid_y = PIDFFController(Kp = 2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, min_cmd = -500, max_cmd = 500)
 
     ret, frame = cam.get_frame()
     if not ret:
