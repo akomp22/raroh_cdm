@@ -35,23 +35,25 @@ class PIDFFController:
             dt = max(dt, 1e-6)  # Prevent divide-by-zero
 
         self.prev_time = current_time
+
+        # Append error and dt
         self.errors.append(error)
-        # if dt > 0:
         self.dts.append(dt)
 
-        # Trim history
-        if len(self.errors) > self.max_history:
+        # Keep history in sync
+        while len(self.errors) > self.max_history:
             self.errors.pop(0)
+        while len(self.dts) > self.max_history:
             self.dts.pop(0)
 
         # === Filter the error signal ===
         if self.filtered_error is None:
             self.filtered_error = error
             self.prev_filtered_error = error
-            raw_derivative = 0.0  # no derivative on first run
+            raw_derivative = 0.0  # No derivative on first run
         else:
             self.filtered_error = (self.error_alpha * self.filtered_error +
-                                (1 - self.error_alpha) * error)
+                                   (1 - self.error_alpha) * error)
             raw_derivative = (self.filtered_error - self.prev_filtered_error) / dt
             self.prev_filtered_error = self.filtered_error
 
@@ -60,20 +62,22 @@ class PIDFFController:
                                     (1 - self.derivative_alpha) * raw_derivative)
 
         # === Integral calculation using raw error ===
-        if len(self.dts) > 0:
-            integral = np.sum(np.array(self.errors[1:]) * np.array(self.dts))
+        min_len = min(len(self.errors) - 1, len(self.dts))
+        if min_len > 0:
+            errors_arr = np.array(self.errors[1:1 + min_len])
+            dts_arr = np.array(self.dts[:min_len])
+            integral = np.sum(errors_arr * dts_arr)
             integral = np.clip(integral, -self.i_max, self.i_max)
         else:
             integral = 0.0
 
         # === Final command ===
         cmd = (self.Kp * self.filtered_error +
-            self.Ki * integral +
-            self.Kd * self.filtered_derivative +
-            self.Kff * setpoint)
+               self.Ki * integral +
+               self.Kd * self.filtered_derivative +
+               self.Kff * setpoint)
 
         return np.clip(cmd, self.min_cmd, self.max_cmd)
-
 
     def reset(self):
         self.errors.clear()
