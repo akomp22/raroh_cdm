@@ -1086,7 +1086,7 @@ class MavlinkWrapper:
 #         print(read_rc_channel)
 
 if __name__ == "__main__":
-    connection_string = 'COM13'  
+    connection_string = '/dev/ttyACM0'  
     # connection_string = "udpin:localhost:14551"
     source_system = 255
     mavlink_wrapper = MavlinkWrapper(connection_string, source_system=source_system)
