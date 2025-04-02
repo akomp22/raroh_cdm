@@ -36,13 +36,12 @@ class PIDFFController:
 
         self.prev_time = current_time
         self.errors.append(error)
-        if dt > 0:
-            self.dts.append(dt)
+        # if dt > 0:
+        self.dts.append(dt)
 
         # Trim history
         if len(self.errors) > self.max_history:
             self.errors.pop(0)
-        if len(self.dts) > self.max_history:
             self.dts.pop(0)
 
         # === Filter the error signal ===
