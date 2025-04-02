@@ -294,24 +294,41 @@ class MavlinkWrapper:
         else:
             return True
         
-    def set_rc_channel_pwm(self,channel_id, pwm=1500):
-        """ Set RC channel pwm value
-        Args:
-            channel_id (TYPE): Channel ID
-            pwm (int, optional): Channel pwm value 1100-1900
+    def set_rc_channel_pwm(self, channels, pwms):
         """
-        if channel_id < 1 or channel_id > 18:
-            print("Channel does not exist.")
-            return False
+        Set multiple RC channel PWM values.
 
-        # Mavlink 2 supports up to 18 channels:
-        # https://mavlink.io/en/messages/common.html#RC_CHANNELS_OVERRIDE
-        rc_channel_values = [0 for _ in range(16)]
-        rc_channel_values[channel_id - 1] = pwm
+        Args:
+            channels (int or list): Channel number(s) to set (1-based).
+            pwms (int or list): PWM value(s) for each channel (1100-1900).
+
+        Example:
+            set_rc_channel_pwm([1, 3], [1500, 1600])
+        """
+        # Convert to list if single value
+        if isinstance(channels, int):
+            channels = [channels]
+        if isinstance(pwms, int):
+            pwms = [pwms]
+
+        if len(channels) != len(pwms):
+            raise ValueError("Channels and PWM values must have the same length")
+
+        # Initialize all 18 channels to 0 (means: no override)
+        rc_channel_values = [0] * 18
+
+        for ch, pwm in zip(channels, pwms):
+            if ch < 1 or ch > 18:
+                raise ValueError(f"Channel {ch} out of range. Must be between 1 and 18")
+            rc_channel_values[ch - 1] = pwm
+
+        # Send MAVLink RC override
         self.connection.mav.rc_channels_override_send(
-                self.connection.target_system,                # target_system
-                self.connection.target_component,             # target_component
-                *rc_channel_values)                  # RC channel list, in microseconds.
+            self.connection.target_system,
+            self.connection.target_component,
+            *rc_channel_values[:8],  # First 8 channels
+            *rc_channel_values[8:]   # Remaining 10 channels
+        )
         
     def set_mode(self,mode,timeout = 10):
         if mode not in self.connection.mode_mapping():
@@ -1104,7 +1121,7 @@ if __name__ == "__main__":
     )
     while True:
         mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_SERVO_OUTPUT_RAW, 1)
-        mavlink_wrapper.set_rc_channel_pwm(2,1300)
+        mavlink_wrapper.set_rc_channel_pwm([1,2], [1300,1300])
         msg = mavlink_wrapper.connection.recv_match(type='RC_CHANNELS', blocking=True, timeout=0.1)
         if msg:
             print(f"RC1={msg.chan1_raw}; RC2={msg.chan2_raw}; RC3={msg.chan3_raw}; RC3={msg.chan4_raw}")
