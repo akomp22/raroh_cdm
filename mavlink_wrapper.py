@@ -306,7 +306,7 @@ class MavlinkWrapper:
 
         # Mavlink 2 supports up to 18 channels:
         # https://mavlink.io/en/messages/common.html#RC_CHANNELS_OVERRIDE
-        rc_channel_values = [65535 for _ in range(18)]
+        rc_channel_values = [0 for _ in range(16)]
         rc_channel_values[channel_id - 1] = pwm
         self.connection.mav.rc_channels_override_send(
                 self.connection.target_system,                # target_system
@@ -1086,16 +1086,25 @@ class MavlinkWrapper:
 #         print(read_rc_channel)
 
 if __name__ == "__main__":
-    connection_string = 'COM19'  
+    connection_string = 'COM13'  
     # connection_string = "udpin:localhost:14551"
     source_system = 255
     mavlink_wrapper = MavlinkWrapper(connection_string, source_system=source_system)
     mavlink_wrapper.connect()
+    mavlink_wrapper.set_mode('FBWA') 
     # mavlink_wrapper.run_telemetry_parralel()
     mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_RC_CHANNELS, 1)
+    mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_SERVO_OUTPUT_RAW, 1)
     # mavlink_wrapper.set_mode('MANUAL')
+    mavlink_wrapper.connection.mav.rc_channels_override_send(
+        mavlink_wrapper.connection.target_system,
+        mavlink_wrapper.connection.target_component,
+        1500, 1500, 1300, 1500, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0  # Fill rest with zeros
+    )
     while True:
-        mavlink_wrapper.set_rc_channel_pwm(1,1800)
+        mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_SERVO_OUTPUT_RAW, 1)
+        mavlink_wrapper.set_rc_channel_pwm(2,1300)
         msg = mavlink_wrapper.connection.recv_match(type='RC_CHANNELS', blocking=True, timeout=0.1)
         if msg:
             print(f"RC1={msg.chan1_raw}; RC2={msg.chan2_raw}; RC3={msg.chan3_raw}; RC3={msg.chan4_raw}")

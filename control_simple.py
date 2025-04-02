@@ -12,6 +12,13 @@ if __name__ == '__main__':
     mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system)
     mavlink_wrapper.connect()
     mavlink_wrapper.run_telemetry_parralel()
+        # mavlink_wrapper.set_mode('MANUAL')
+    mavlink_wrapper.connection.mav.rc_channels_override_send(
+        mavlink_wrapper.connection.target_system,
+        mavlink_wrapper.connection.target_component,
+        1500, 1500, 1500, 1500, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0  # Fill rest with zeros
+    )
     # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_ATTITUDE, 1)
     cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
 
