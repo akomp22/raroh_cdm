@@ -18,8 +18,8 @@ class Camera():
         elif self.type == 'rpi':
             from picamera2 import Picamera2
             self.picam2 = Picamera2()
-            # config = self.picam2.create_preview_configuration(main={"size": (640, 480), "format": "RGB888"})
-            # self.picam2.configure(config)
+            config = self.picam2.create_preview_configuration()    # main={"size": (640, 480), "format": "RGB888"}
+            self.picam2.configure(config)
             # config["controls"] = {"FrameRate": 50}  # Optional: Adjust frame rate
             self.picam2.start()
 
