@@ -22,6 +22,7 @@ class Camera():
             self.picam2.configure(config)
             # config["controls"] = {"FrameRate": 50}  # Optional: Adjust frame rate
             self.picam2.start()
+            time.sleep(2)
 
     def release(self):
         if self.type == 'jetson' or self.type == 'record' or self.type == 'windows':

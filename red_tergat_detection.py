@@ -34,10 +34,13 @@ def find_red_spot_center(frame):
 if __name__ == "__main__":
     import sys
     import os
+    import time
 
     cam = Camera(type="rpi", camera_id="/dev/video0",video_path=None)
     ret, frame = cam.get_frame()
     height, width = frame.shape[:2]
+    print(height, width)
+    time.sleep(5)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     if not os.path.exists("test_videos"):
         os.makedirs("test_videos")
