@@ -38,7 +38,8 @@ class Camera():
             self.picam2 = Picamera2()
             try:
                 config = self.picam2.create_video_configuration(
-                    main={"size": self.resolution, "format": "YUV420"}
+                    main={"size": self.resolution, "format": "YUV420"},
+                    controls={"FrameRate": 90}
                 )
                 self.picam2.configure(config)
             except Exception as e:
