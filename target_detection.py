@@ -37,7 +37,7 @@ if __name__ == "__main__":
     import os
     import time
 
-    cam = Camera(type="rpi", camera_id="/dev/video0",video_path=None)
+    cam = Camera(type="rpi", camera_id="/dev/video0",video_path=None, resolution=(640, 480))
     ret, frame = cam.get_frame()
     height, width = frame.shape[:2]
     print(height, width)
