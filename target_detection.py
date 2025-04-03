@@ -5,7 +5,7 @@ from camera import Camera
 def find_red_spot_center(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    lower_red1 = np.array([0, 150, 110])
+    lower_red1 = np.array([0, 120, 90])
     upper_red1 = np.array([5, 255, 255])
     lower_red2 = np.array([175, 150, 150])
     upper_red2 = np.array([180, 255, 255])
@@ -64,13 +64,13 @@ if __name__ == "__main__":
             if frame_count % 10 == 0:
                 print(f"Coordinates: {coord}, FPS: {fps:.2f}")
 
-            if coord:
-                disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
-                cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
-                cv2.circle(mask_cleaned, disp_coord, 5, (255), -1)
+            # if coord:
+            #     disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
+            #     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
+            #     cv2.circle(mask_cleaned, disp_coord, 5, (255), -1)
 
-            out_frame.write(frame)
-            out_mask.write(mask_cleaned)
+            # out_frame.write(frame)
+            # out_mask.write(mask_cleaned)
             frame_count += 1
 
             # # Optional: Show live preview
