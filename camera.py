@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import threading
 from queue import Queue
+import time
 
 class Camera():
     def __init__(self, type, camera_id = "/dev/video0", video_path = None): 
