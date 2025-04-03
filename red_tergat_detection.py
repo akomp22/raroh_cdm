@@ -6,8 +6,8 @@ def find_red_spot_center(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     lower_red1 = np.array([0, 150, 100])
-    upper_red1 = np.array([5, 255, 255])
-    lower_red2 = np.array([175, 150, 100])
+    upper_red1 = np.array([3, 255, 255])
+    lower_red2 = np.array([177, 150, 100])
     upper_red2 = np.array([180, 255, 255])
 
 
@@ -54,8 +54,9 @@ if __name__ == "__main__":
             coord, mask_cleaned = find_red_spot_center(frame)
             print(f"Coordinates: {coord}")
             if coord:
-                disp_coord = (coord[1] + width // 2, coord[0] + height // 2)
+                disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
                 cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
+                cv2.circle(mask_cleaned, disp_coord, 5, (0, 255, 0), -1)
             out_frame.write(frame)
             out_mask.write(mask_cleaned)
             frame_count = frame_count + 1
