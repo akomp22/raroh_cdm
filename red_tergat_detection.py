@@ -54,8 +54,8 @@ if __name__ == "__main__":
             coord, mask_cleaned = find_red_spot_center(frame)
             print(f"Coordinates: {coord}")
             if coord:
-                disp_coord = (coord[1] + width // 2, coord[0] + height // 2,)
-                cv2.circle(frame, coord, 5, (0, 255, 0), -1)
+                disp_coord = (coord[1] + width // 2, coord[0] + height // 2)
+                cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
             out_frame.write(frame)
             out_mask.write(mask_cleaned)
             frame_count = frame_count + 1
