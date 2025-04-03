@@ -15,9 +15,10 @@ def find_red_spot_center(frame):
     mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
     mask = cv2.bitwise_or(mask1, mask2)
 
-    kernel = np.ones((3, 3), np.uint8)
-    mask_cleaned = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    mask_cleaned = cv2.morphologyEx(mask_cleaned, cv2.MORPH_CLOSE, kernel)
+    # kernel = np.ones((3, 3), np.uint8)
+    # mask_cleaned = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    # mask_cleaned = cv2.morphologyEx(mask_cleaned, cv2.MORPH_CLOSE, kernel)
+    mask_cleaned = mask
 
     contours, _ = cv2.findContours(mask_cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = [cnt for cnt in contours if cv2.contourArea(cnt) > 100]
