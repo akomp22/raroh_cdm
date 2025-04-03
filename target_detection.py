@@ -65,13 +65,13 @@ if __name__ == "__main__":
 
             print(f"Coordinates: {coord}, FPS: {fps:.2f}")
 
-            if coord:
-                disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
-                cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
-                cv2.circle(mask_cleaned, disp_coord, 5, (255), -1)
+            # if coord:
+            #     disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
+            #     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
+            #     cv2.circle(mask_cleaned, disp_coord, 5, (255), -1)
 
-            out_frame.write(frame)
-            out_mask.write(mask_cleaned)
+            # out_frame.write(frame)
+            # out_mask.write(mask_cleaned)
             frame_count += 1
 
             # # Optional: Show live preview
