@@ -38,7 +38,7 @@ class Camera():
             self.picam2 = Picamera2()
             try:
                 config = self.picam2.create_video_configuration(
-                    main={"size": self.resolution, "format": "RGB888"}
+                    main={"size": self.resolution, "format": "YUV420"}
                 )
                 self.picam2.configure(config)
             except Exception as e:
@@ -46,7 +46,7 @@ class Camera():
                 print("[INFO] Falling back to default resolution (640x480).")
                 self.resolution = (640, 480)
                 config = self.picam2.create_video_configuration(
-                    main={"size": self.resolution, "format": "RGB888"}
+                    main={"size": self.resolution, "format": "YUV420"}
                 )
                 self.picam2.configure(config)
 
@@ -72,7 +72,7 @@ class Camera():
             return ret,frame
         elif self.type == 'rpi':
             frame = self.picam2.capture_array()
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) 
+            frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             # frame = frame[:480,:]
             return True, frame
     
