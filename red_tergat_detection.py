@@ -4,7 +4,7 @@ from camera import Camera
 
 def find_red_spot_center(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    
+
     lower_red1 = np.array([0, 70, 50])
     upper_red1 = np.array([10, 255, 255])
     lower_red2 = np.array([170, 70, 50])
@@ -48,6 +48,7 @@ if __name__ == "__main__":
         while True:
             ret, frame = cam.get_frame()
             coord, mask_cleaned = find_red_spot_center(frame)
+            print(f"Coordinates: {coord}")
             if coord:
                 cv2.circle(frame, coord, 5, (0, 255, 0), -1)
             out_frame.write(frame)
@@ -64,6 +65,7 @@ if __name__ == "__main__":
         print("\nRecording interrupted by user.")
 
     finally:
+        print(f"Total frames processed: {frame_count}")
         cam.release()
         out_frame.release()
         out_mask.release()
