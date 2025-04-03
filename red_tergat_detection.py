@@ -45,8 +45,8 @@ if __name__ == "__main__":
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     if not os.path.exists("test_videos"):
         os.makedirs("test_videos")
-    out_frame = cv2.VideoWriter("test_videos/camera_output.avi", fourcc, 30.0, (width, height))
-    out_mask = cv2.VideoWriter("test_videos/mask_output.avi", fourcc, 30.0, (width, height), isColor=False)
+    out_frame = cv2.VideoWriter("test_videos/camera_output.avi", fourcc, 30.0, (height, width))
+    out_mask = cv2.VideoWriter("test_videos/mask_output.avi", fourcc, 30.0, (height, width), isColor=False)
     frame_count = 0
     try:
         while True:
