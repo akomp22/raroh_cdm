@@ -37,7 +37,7 @@ if __name__ == "__main__":
     import os
     import time
 
-    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
+    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(320, 240))
     ret, frame = cam.get_frame()
     height, width = frame.shape[:2]
     print(height, width)
@@ -46,8 +46,8 @@ if __name__ == "__main__":
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     if not os.path.exists("test_videos"):
         os.makedirs("test_videos")
-    # out_frame = cv2.VideoWriter("test_videos/camera_output.avi", fourcc, 30.0, (width, height))
-    # out_mask = cv2.VideoWriter("test_videos/mask_output.avi", fourcc, 30.0, (width, height), isColor=False)
+    out_frame = cv2.VideoWriter("test_videos/camera_output.avi", fourcc, 30.0, (width, height))
+    out_mask = cv2.VideoWriter("test_videos/mask_output.avi", fourcc, 30.0, (width, height), isColor=False)
 
     frame_count = 0
     start_time = time.time()
@@ -63,13 +63,13 @@ if __name__ == "__main__":
             if frame_count % 10 == 0:
                 print(f"Coordinates: {coord}, FPS: {fps:.2f}")
 
-            # if coord:
-            #     disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
-            #     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
-            #     cv2.circle(mask_cleaned, disp_coord, 5, (255), -1)
+            if coord:
+                disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
+                cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
+                cv2.circle(mask_cleaned, disp_coord, 5, (255), -1)
 
-            # out_frame.write(frame)
-            # out_mask.write(mask_cleaned)
+            out_frame.write(frame)
+            out_mask.write(mask_cleaned)
             frame_count += 1
 
             # # Optional: Show live preview
@@ -85,6 +85,6 @@ if __name__ == "__main__":
     finally:
         print("Recording stopped.")
         cam.release()
-        # out_frame.release()
-        # out_mask.release()
+        out_frame.release()
+        out_mask.release()
         cv2.destroyAllWindows()

@@ -39,7 +39,7 @@ class Camera():
             try:
                 config = self.picam2.create_video_configuration(
                     main={"size": self.resolution, "format": "YUV420"},
-                    controls={"FrameRate": 90}
+                    controls={"FrameRate": 120}
                 )
                 self.picam2.configure(config)
             except Exception as e:
@@ -48,7 +48,7 @@ class Camera():
                 self.resolution = (640, 480)
                 config = self.picam2.create_video_configuration(
                     main={"size": self.resolution, "format": "YUV420"},
-                    controls={"FrameRate": 90}
+                    controls={"FrameRate": 120}
                 )
                 self.picam2.configure(config)
             print(self.picam2.camera_controls)
