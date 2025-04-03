@@ -44,8 +44,8 @@ if __name__ == "__main__":
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     if not os.path.exists("test_videos"):
         os.makedirs("test_videos")
-    out_frame = cv2.VideoWriter("test_videos/camera_output.avi", fourcc, 20.0, (width, height))
-    out_mask = cv2.VideoWriter("test_videos/mask_output.avi", fourcc, 20.0, (width, height), isColor=False)
+    out_frame = cv2.VideoWriter("test_videos/camera_output.avi", fourcc, 30.0, (width, height))
+    out_mask = cv2.VideoWriter("test_videos/mask_output.avi", fourcc, 30.0, (width, height), isColor=False)
     frame_count = 0
     try:
         while True:
@@ -53,7 +53,7 @@ if __name__ == "__main__":
             coord, mask_cleaned = find_red_spot_center(frame)
             print(f"Coordinates: {coord}")
             if coord:
-                disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
+                disp_coord = (coord[0] + height // 2, coord[1] + width // 2)
                 cv2.circle(frame, coord, 5, (0, 255, 0), -1)
             out_frame.write(frame)
             out_mask.write(mask_cleaned)
