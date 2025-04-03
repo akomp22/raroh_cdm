@@ -50,7 +50,7 @@ class Camera():
                     controls={"FrameRate": 90}
                 )
                 self.picam2.configure(config)
-
+            print(picam2.camera_controls)
             self.picam2.start()
             time.sleep(2)
 
