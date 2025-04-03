@@ -4,15 +4,15 @@ import threading
 from queue import Queue
 
 class Camera():
-    def __init__(self, type, video_path, camera_id = "/dev/video0"): 
+    def __init__(self, type, camera_id = "/dev/video0", video_path = None): 
         """" 'ls /dev/video*' to find the camera id"""
-        assert type in ['jetson', 'rpi', 'record'], "type must be 'jetson' or 'rpi' or 'record'"
+        assert type in ['jetson', 'rpi', 'record', 'windows'], "type must be 'jetson' or 'rpi' or 'record'"
         self.type = type
         self.video_path = video_path
         self.camera_id = camera_id
         if self.type == 'record':
             self.cap = cv2.VideoCapture(self.video_path)
-        elif self.type == 'jetson':
+        elif self.type == 'jetson' or self.type == 'windows':
             self.cap = cv2.VideoCapture(camera_id)
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         elif self.type == 'rpi':
@@ -20,22 +20,22 @@ class Camera():
             self.picam2 = Picamera2()
             config = self.picam2.create_preview_configuration(main={"size": (640, 480), "format": "RGB888"})
             self.picam2.configure(config)
-            config["controls"] = {"FrameRate": 50}  # Optional: Adjust frame rate
+            # config["controls"] = {"FrameRate": 50}  # Optional: Adjust frame rate
             self.picam2.start()
 
     def release(self):
-        if self.type == 'jetson' or self.type == 'record':
+        if self.type == 'jetson' or self.type == 'record' or self.type == 'windows':
             self.cap.release()
         elif self.type == 'rpi':
             self.picam2.stop()
 
     def reset(self):
-        self.__init__(self.type, self.video_path, self.camera_id)
+        self.__init__(self.type, self.camera_id, self.video_path)
         
     
     def get_frame(self):
         # grab to ignore camera buffer and get most recent frame
-        if self.type == 'jetson' or self.type == 'record':
+        if self.type == 'jetson' or self.type == 'record' or self.type == 'windows':
             self.cap.grab()
             ret, frame = self.cap.read()
             if not ret:
@@ -43,7 +43,7 @@ class Camera():
             return ret,frame
         elif self.type == 'rpi':
             frame = self.picam2.capture_array()
-            frame = frame[:480,:]
+            # frame = frame[:480,:]
             return True, frame
     
     def init_undiostort(self, cameraMatrix, dist):

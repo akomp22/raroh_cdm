@@ -1116,7 +1116,7 @@ if __name__ == "__main__":
     mavlink_wrapper.connection.mav.rc_channels_override_send(
         mavlink_wrapper.connection.target_system,
         mavlink_wrapper.connection.target_component,
-        1500, 1500, 1300, 1500, 0, 0, 0, 0,
+        1500, 1500, 1500, 1500, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0  # Fill rest with zeros
     )
     while True:
