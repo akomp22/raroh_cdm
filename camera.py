@@ -46,7 +46,8 @@ class Camera():
                 print("[INFO] Falling back to default resolution (640x480).")
                 self.resolution = (640, 480)
                 config = self.picam2.create_video_configuration(
-                    main={"size": self.resolution, "format": "YUV420"}
+                    main={"size": self.resolution, "format": "YUV420"},
+                    controls={"FrameRate": 90}
                 )
                 self.picam2.configure(config)
 
