@@ -1,7 +1,7 @@
 from mavlink_wrapper import MavlinkWrapper
 from camera import Camera
 from pymavlink import mavutil
-from red_tergat_detection import find_red_spot_center
+from tergat_detection import find_red_spot_center
 from pid_ff_controller import PIDFFController
 import time
 
