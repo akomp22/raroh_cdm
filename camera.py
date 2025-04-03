@@ -103,7 +103,7 @@ if __name__ == "__main__":
     input_video = "data_inputs/1.mp4"
     output_video = "data_outputs/1.avi"
 
-    cam = Camera(type="windows",video_path=input_video, camera_id="1", resolution=(640, 420))
+    cam = Camera(type="windows",video_path=input_video, camera_id="1", resolution=(320, 240))
 
     ret, frame = cam.get_frame()
     if not ret:
