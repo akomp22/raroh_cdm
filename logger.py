@@ -59,7 +59,6 @@ class Logger:
         self.scalar_queue = Queue()
         self.flush_interval = flush_interval
 
-        # Start background scalar writer process
         self.scalar_writer_process = Process(
             target=self._scalar_writer_loop,
             args=(self.scalar_queue, self.scalar_log_path, self.flush_interval)
@@ -76,17 +75,20 @@ class Logger:
             "step": step,
             "value": value
         }
-        self.scalar_queue.put(entry)
+        if self.scalar_queue is not None:
+            self.scalar_queue.put(entry)
 
     def _scalar_writer_loop(self, queue, path, flush_interval):
         scalars = {}
         last_flush = time.time()
 
         while True:
-            flushed = False
             try:
-                # Non-blocking queue read with timeout
                 entry = queue.get(timeout=flush_interval)
+
+                if entry == "__STOP__":
+                    break
+
                 name = entry["name"]
                 if name not in scalars:
                     scalars[name] = []
@@ -95,21 +97,16 @@ class Logger:
                     "step": entry["step"],
                     "value": entry["value"]
                 })
-            except:
-                pass  # timeout
 
-            # Flush if interval passed
+            except:
+                pass  # Timeout
+
             if time.time() - last_flush >= flush_interval:
                 with open(path, 'w') as f:
                     json.dump(scalars, f, indent=2)
                 last_flush = time.time()
-                flushed = True
 
-            # Exit when queue is closed and empty
-            if not queue._reader.poll() and queue.empty():
-                break
-
-        # Final write
+        # Final flush
         with open(path, 'w') as f:
             json.dump(scalars, f, indent=2)
 
@@ -129,10 +126,11 @@ class Logger:
             json.dump(params, f, indent=2)
 
     def close(self):
-        # Stop scalar writer process
-        self.scalar_queue.close()
-        self.scalar_queue.join_thread()
-        self.scalar_writer_process.join()
+        if self.scalar_queue is not None:
+            self.scalar_queue.put("__STOP__")
+            self.scalar_queue.close()
+            self.scalar_queue.join_thread()
+            self.scalar_writer_process.join()
 
         for writer in self.video_writers.values():
             writer.release()
