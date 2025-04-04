@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
-    time.sleep(4)
+    
     camera_matrix, dist_coeffs = Camera.read_params(folder = "params_rpi_0")
     # cam.init_undiostort(camera_matrix, dist_coeffs)
 
@@ -80,6 +80,7 @@ if __name__ == '__main__':
     last_coord = (0, 0)
     angle_ch1_rad_prev = 0.0
     angle_ch2_rad_prev = 0.0
+    time.sleep(4)
     while True:
         ret, frame = cam.get_frame()
         coord, mask_cleaned = find_red_spot_center(frame, cx, cy)
