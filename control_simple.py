@@ -11,8 +11,8 @@ import cv2
 if __name__ == '__main__':
     COORD_ALPHA = 0.99
     NAV_GAIN = 0
-    KP_CH1 = 4000
-    KP_CH2 = 4000
+    KP_CH1 = 8000
+    KP_CH2 = 8000
 
     REVERSED_CH1 = True
     REVERSED_CH2 = False
@@ -83,6 +83,9 @@ if __name__ == '__main__':
     time.sleep(4)
     try:
         while True:
+            if time.time() - msg_rate_update_time > 0.7:
+                mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_AOA_SSA, 1)
+                msg_rate_update_time = time.time()
             ret, frame = cam.get_frame()
             coord, mask_cleaned = find_red_spot_center(frame, cx, cy)
             t1 = time.time()
