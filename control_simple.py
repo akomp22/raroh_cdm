@@ -13,6 +13,10 @@ if __name__ == '__main__':
     coord_alpha = 0.5
     reversed_ch1 = True
     reversed_ch2 = False
+    max_ch1 = 1700
+    min_ch1 = 1300 
+    max_ch2 = 1700
+    min_ch2 = 1300
 
     mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system, data_list = ['AOA_SSA'])
     mavlink_wrapper.connect()
@@ -70,18 +74,18 @@ if __name__ == '__main__':
         # ssa = aoa_ssa.ssa
 
 
-        cmd_x = pid_ch1.get_command(setpoint = 0, current_value = angle_x_rad, current_time = time.time())
-        cmd_y = pid_ch2.get_command(setpoint = 0, current_value = angle_y_rad, current_time = time.time())
+        cmd_ch1 = pid_ch1.get_command(setpoint = 0, current_value = angle_x_rad, current_time = time.time())
+        cmd_ch2 = pid_ch2.get_command(setpoint = 0, current_value = angle_y_rad, current_time = time.time())
         if reversed_ch1:
-            cmd_x = -cmd_x
+            cmd_ch1 = -cmd_ch1
         if reversed_ch2:
-            cmd_y = -cmd_y
-        cmd_x = int(rc1_trim+cmd_x)
-        cmd_y = int(rc2_trim+cmd_y)
-        cmd_x = max(min(cmd_x, 2000), 1000)
-        cmd_y = max(min(cmd_y, 2000), 1000)
-        print(f"angle_x_rad {angle_x_rad:.3f} angle_y_rad {angle_y_rad:.3f}; cmd x {cmd_x}; cmd y {cmd_y}")
-        mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_x, cmd_y])
+            cmd_ch2 = -cmd_ch2
+        cmd_ch1 = int(rc1_trim+cmd_ch1)
+        cmd_ch2 = int(rc2_trim+cmd_ch2)
+        cmd_ch1 = max(min(cmd_ch1, max_ch1), min_ch1)
+        cmd_ch2 = max(min(cmd_ch2, max_ch2), min_ch2)
+        print(f"angle_x_rad {angle_x_rad:.3f} angle_y_rad {angle_y_rad:.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}")
+        mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_ch1, cmd_ch2])
 
 
 
