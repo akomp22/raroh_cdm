@@ -11,6 +11,8 @@ if __name__ == '__main__':
     # connection_string = "udpin:localhost:14551"
     source_system = 255
     coord_alpha = 0.5
+    reversed_ch1 = True
+    reversed_ch2 = False
 
     mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system, data_list = ['AOA_SSA'])
     mavlink_wrapper.connect()
@@ -70,7 +72,10 @@ if __name__ == '__main__':
 
         cmd_x = pid_ch1.get_command(setpoint = 0, current_value = angle_x_rad, current_time = time.time())
         cmd_y = pid_ch2.get_command(setpoint = 0, current_value = angle_y_rad, current_time = time.time())
-
+        if reversed_ch1:
+            cmd_x = -cmd_x
+        if reversed_ch2:
+            cmd_y = -cmd_y
         cmd_x = int(rc1_trim+cmd_x)
         cmd_y = int(rc2_trim+cmd_y)
         cmd_x = max(min(cmd_x, 2000), 1000)
