@@ -37,7 +37,7 @@ if __name__ == "__main__":
     import sys
     import os
     import time
-    import datetime
+    from datetime import datetime
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
     ret, frame = cam.get_frame()
