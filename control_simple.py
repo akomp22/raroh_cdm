@@ -10,9 +10,9 @@ import cv2
 
 if __name__ == '__main__':
     COORD_ALPHA = 0.99
-    NAV_GAIN = 5000
-    KP_CH1 = 8000
-    KP_CH2 = 8000
+    NAV_GAIN = 4000
+    KP_CH1 = 4000
+    KP_CH2 = 4000
 
     REVERSED_CH1 = True
     REVERSED_CH2 = False
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     MAC_CH2 = 1800
     MIN_CH1 = 1200
 
-    SAVE_DATA = False
+    SAVE_DATA = True
 
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
