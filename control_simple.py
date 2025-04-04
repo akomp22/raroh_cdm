@@ -10,7 +10,7 @@ if __name__ == '__main__':
     connection_string = '/dev/ttyACM0'  
     # connection_string = "udpin:localhost:14551"
     source_system = 255
-    coord_alpha = 0.5
+    coord_alpha = 0.99
     reversed_ch1 = True
     reversed_ch2 = False
     max_ch1 = 1800
