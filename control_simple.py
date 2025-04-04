@@ -10,7 +10,7 @@ import cv2
 
 if __name__ == '__main__':
     COORD_ALPHA = 0.99
-    NAV_GAIN = 4000
+    NAV_GAIN = 0
     KP_CH1 = 4000
     KP_CH2 = 4000
 
