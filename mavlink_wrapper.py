@@ -24,29 +24,36 @@ def to_quaternion(roll=0.0, pitch=0.0, yaw=0.0):
     return [w, x, y, z]
 
 class MavlinkWrapper:
-    def __init__(self, connection_string, source_system=1):
+    def __init__(self, connection_string, source_system=1, data_list = None):
         self.connection_string = connection_string
         self.source_system = source_system
         self.message_hook_function = None
 
+        all_messages = [
+            'GLOBAL_POSITION_INT',
+            'ATTITUDE',
+            'VFR_HUD',
+            'HEARTBEAT',
+            'AOA_SSA',
+            'LOCAL_POSITION_NED',
+            'RC_CHANNELS',
+            'COMMAND_ACK',
+            'PARAM_VALUE',
+            'HOME_POSITION',
+            'MISSION_ITEM_INT',
+            'MISSION_COUNT',
+            'MISSION_ACK' ,
+            'MISSION_CURRENT' ,
+            'TERRAIN_REPORT'
+        ]
+
+        self.data_list = data_list if data_list is not None else all_messages
+
         self.manager = Manager()
-        self.messages = self.manager.dict({
-            'GLOBAL_POSITION_INT': None,
-            'ATTITUDE': None,
-            'VFR_HUD': None,
-            'HEARTBEAT': None,
-            'AOA_SSA': None,
-            'LOCAL_POSITION_NED': None,
-            'RC_CHANNELS': None,
-            'COMMAND_ACK': None,
-            'PARAM_VALUE': None,
-            'HOME_POSITION': None,
-            'MISSION_ITEM_INT': None,
-            'MISSION_COUNT': None,
-            'MISSION_ACK' : None,
-            'MISSION_CURRENT' : None,
-            'TERRAIN_REPORT' : None
-        })
+        self.messages = self.manager.dict({msg_type: None for msg_type in self.data_list})
+
+        invalid = set(self.data_list) - set(all_messages)
+        assert not invalid, f"Invalid MAVLink message types in data_list: {invalid}"
 
         self.parralel_telemetry = False
 

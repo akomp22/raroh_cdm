@@ -1,8 +1,13 @@
 import numpy as np
 
 class PIDFFController:
-    def __init__(self, Kp, Ki, Kd, Kff, i_max, min_cmd, max_cmd,
-                 error_alpha=0.9, derivative_alpha=0.8, max_history=1000):
+    def __init__(self, Kp, Ki, Kd, Kff, i_max, min_cmd = None, max_cmd = None,
+                 error_alpha=0.9, derivative_alpha=0.8, max_history=1000, nonlinear_mode=None):
+        
+        if nonlinear_mode not in ['squared', 'tanh', 'sqrt', None]:
+            raise ValueError("proportional_strategy must be 'raw' or 'filtered'")
+        self.nonlinear_mode = nonlinear_mode
+
         self.Kp = Kp
         self.Ki = Ki
         self.Kd = Kd
@@ -26,6 +31,13 @@ class PIDFFController:
 
     def get_command(self, setpoint, current_value, current_time):
         error = setpoint - current_value
+        if self.nonlinear_mode == "squared":
+            error = np.sign(error) * error**2
+        elif self.nonlinear_mode == "tanh":
+            scale = 100  # tweak based on expected range
+            error = np.tanh(error / scale) * scale
+        elif self.nonlinear_mode == "sqrt":
+            error = np.sign(error) * np.sqrt(abs(error))
 
         # Time difference
         if self.prev_time is None:
@@ -76,8 +88,14 @@ class PIDFFController:
                self.Ki * integral +
                self.Kd * self.filtered_derivative +
                self.Kff * setpoint)
-
-        return np.clip(cmd, self.min_cmd, self.max_cmd)
+        
+        if self.min_cmd is not None and self.max_cmd is not None:
+            cmd = np.clip(cmd, self.min_cmd, self.max_cmd)
+        elif self.min_cmd is not None:
+            cmd = np.clip(cmd, self.min_cmd, None)
+        elif self.max_cmd is not None:
+            cmd = np.clip(cmd, None, self.max_cmd)
+        return cmd
 
     def reset(self):
         self.errors.clear()

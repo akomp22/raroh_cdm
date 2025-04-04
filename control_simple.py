@@ -2,55 +2,77 @@ from mavlink_wrapper import MavlinkWrapper
 from camera import Camera
 from pymavlink import mavutil
 from target_detection import find_red_spot_center
-from pid_ff_controller import PIDFFController
+from pidff_controller import PIDFFController
 import time
+import numpy as np
 
 if __name__ == '__main__':
     connection_string = '/dev/ttyACM0'  
-    source_system = 255
     # connection_string = "udpin:localhost:14551"
-    mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system)
+    source_system = 255
+    coord_alpha = 0.5
+
+    mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system, data_list = ['AOA_SSA'])
     mavlink_wrapper.connect()
     mavlink_wrapper.run_telemetry_parralel()
-        # mavlink_wrapper.set_mode('MANUAL')
+
+    fx = 1500
+    fy = 1500
+    cx = 320
+    cy = 240
+
+    ###### Somehow this initiates god connection ##########
     mavlink_wrapper.connection.mav.rc_channels_override_send(
         mavlink_wrapper.connection.target_system,
         mavlink_wrapper.connection.target_component,
         1500, 1500, 1500, 1500, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0  # Fill rest with zeros
     )
-    # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_ATTITUDE, 1)
-    cam = Camera(type="rpi", video_path=None, camera_id="/dev/video0")
+    ##################################################
 
-    pid_x = PIDFFController(Kp = 2, Ki = 0,Kd = 0, Kff = 0, i_max = 1, min_cmd = -500, max_cmd = 500)
-    pid_y = PIDFFController(Kp = 2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, min_cmd = -500, max_cmd = 500)
+    rc1_trim = mavlink_wrapper.get_param('RC1_TRIM')
+    rc2_trim = mavlink_wrapper.get_param('RC2_TRIM')
+    print(f"RC1_TRIM: {rc1_trim}, RC2_TRIM: {rc2_trim}")
+
+    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
+
+    pid_ch1 = PIDFFController(Kp = 2, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode="squeared")
+    pid_ch2 = PIDFFController(Kp = 2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode="squeared")
 
     ret, frame = cam.get_frame()
-    if not ret:
-        print("Error reading frame")
-    image_y_center = frame.shape[0]/2
-    image_x_center = frame.shape[1]/2
     
+    prev_coord = (0, 0)
     while True:
         ret, frame = cam.get_frame()
-        if not ret:
-            print("Error reading frame")
-            break
         coord, mask_cleaned = find_red_spot_center(frame)
-        if coord is None:
-            coord = (-1,-1)
-            dx = 0
-            dy = 0
+        last_seen_time = time.time()
+        if coord:
+            last_coord = coord
+            last_seen_time = time.time()
+        elif time.time() - last_seen_time < 0.5:
+            coord = last_coord
         else:
-            dx = coord[0]
-            dy = coord[1]
-        cmd_x = pid_x.get_command(setpoint = 0,current_value = dx,current_time = time.time())
-        cmd_y = pid_y.get_command(setpoint = 0,current_value = dy,current_time = time.time())
+            continue
+        
+        coord_filtered = coord_alpha * np.array(coord) + (1 - coord_alpha) * np.array(prev_coord)
+        prev_coord = coord_filtered
 
-        cmd_x = 1500+cmd_x
-        cmd_y = 1500+cmd_y
-        print(image_x_center, image_y_center, dx, dy)
-        print(f"target x {coord[0]} target y{coord[1]}; dx {dx} dy {dy} cmd x {cmd_x}; cmd y {cmd_y}")
+        angle_x_rad = np.arctan(coord_filtered[0] / fx)  # Horizontal angle
+        angle_y_rad = np.arctan(coord_filtered[1] / fy)  # Vertical angle
+
+        # aoa_ssa = mavlink_wrapper.messages["AOA_SSA"]
+        # aoa = aoa_ssa.aoa
+        # ssa = aoa_ssa.ssa
+
+
+        cmd_x = pid_ch1.get_command(setpoint = 0, current_value = angle_x_rad, current_time = time.time())
+        cmd_y = pid_ch2.get_command(setpoint = 0, current_value = angle_y_rad, current_time = time.time())
+
+        cmd_x = rc1_trim+cmd_x
+        cmd_y = rc2_trim+cmd_y
+        cmd_x = max(min(cmd_x, 2000), 1000)
+        cmd_y = max(min(cmd_y, 2000), 1000)
+        print(f"target x {coord[0]} target y{coord[1]}; {cmd_x}; cmd y {cmd_y}")
         mavlink_wrapper.set_rc_channel_pwm([1,2], [int(cmd_x), int(cmd_y)])
 
 
