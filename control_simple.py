@@ -60,6 +60,7 @@ if __name__ == '__main__':
     mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system, data_list = ['AOA_SSA'])
     mavlink_wrapper.connect()
     mavlink_wrapper.run_telemetry_parralel()
+    mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_AOA_SSA, 1)
 
 
     ###### Somehow this initiates god connection ##########
