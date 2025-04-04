@@ -27,13 +27,13 @@ if __name__ == '__main__':
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
     time.sleep(4)
     camera_matrix, dist_coeffs = Camera.read_params(folder = "params_rpi_0")
-    cam.init_undiostort(camera_matrix, dist_coeffs)
+    # cam.init_undiostort(camera_matrix, dist_coeffs)
 
-    optimalCameraMatrix = cam.optimalCameraMatrix
-    fx = optimalCameraMatrix[0, 0]
-    fy = optimalCameraMatrix[1, 1]
-    cx = optimalCameraMatrix[0, 2]
-    cy = optimalCameraMatrix[1, 2]
+    # optimalCameraMatrix = cam.optimalCameraMatrix
+    fx = camera_matrix[0, 0]
+    fy = camera_matrix[1, 1]
+    cx = camera_matrix[0, 2]
+    cy = camera_matrix[1, 2]
     print(f"fx: {fx}, fy: {fy}, cx: {cx}, cy: {cy}")
 
     pid_ch1 = PIDFFController(Kp = KP_CH1, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
