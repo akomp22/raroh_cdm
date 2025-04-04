@@ -158,6 +158,7 @@ class Logger:
         params_path = os.path.join(self.log_dir, "params.json")
         with open(params_path, 'w') as f:
             json.dump(params, f, indent=2)
+            
     def close(self):
         try:
             self.scalar_queue.put(("__STOP__", None))
