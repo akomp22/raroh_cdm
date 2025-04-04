@@ -108,7 +108,10 @@ class Logger:
 
 
     def add_frame_to_video(self, video_name, frame, fps=30):
-        self.video_queue.put((video_name, frame, fps))
+        if self.video_queue.qsize() < 10:  # or use maxsize=100 when creating the queue
+            success, encoded = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+            if success:
+                self.video_queue.put((video_name, encoded.tobytes(), fps))
 
     def _video_writer_loop(self, queue, log_dir):
         import cv2
@@ -118,14 +121,13 @@ class Logger:
         try:
             while True:
                 try:
-                    video_name, frame, fps = queue.get(timeout=0.1)
-
+                    video_name, encoded_bytes, fps = queue.get()
                     if video_name == "__STOP__":
                         break
 
                     height, width = frame.shape[:2]
                     if video_name not in writers:
-                        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                        fourcc = cv2.VideoWriter_fourcc(*'MJPG')  # MJPG for AVI format     
                         path = os.path.join(log_dir, f"{video_name}.avi")
                         writers[video_name] = cv2.VideoWriter(path, fourcc, fps, (width, height))
 
