@@ -45,7 +45,7 @@ if __name__ == '__main__':
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
 
     pid_ch1 = PIDFFController(Kp = 5000, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
-    pid_ch2 = PIDFFController(Kp = 5000, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
+    pid_ch2 = PIDFFController(Kp = 7000, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
 
     ret, frame = cam.get_frame()
     
