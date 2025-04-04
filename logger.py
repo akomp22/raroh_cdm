@@ -120,6 +120,7 @@ class Logger:
         self.scalar_queue.close()
         self.scalar_queue.join_thread()
         self.scalar_writer.join()
+        self.scalar_writer.terminate()
 
         for writer in self.video_writers.values():
             writer.release()

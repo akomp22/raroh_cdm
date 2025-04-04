@@ -168,7 +168,7 @@ if __name__ == '__main__':
                 #     disp_coord = (int(coord[0] + cx), int(coord[1] + cy))
                 #     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
                 # logger.add_frame_to_video("frame", frame, fps=30)
-    except :
+    except KeyboardInterrupt:
         logger.close()
         mavlink_wrapper.close()
         cam.release()
