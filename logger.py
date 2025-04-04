@@ -42,16 +42,18 @@ def json_to_excel(json_path, excel_path):
 
 
 class Logger:
-    def __init__(self, base_log_dir="flight_logs"):
+    def __init__(self, base_log_dir="flight_logs", flush_interval=100):
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         self.log_dir = os.path.join(base_log_dir, timestamp)
         os.makedirs(self.log_dir, exist_ok=True)
 
         self.scalar_log_path = os.path.join(self.log_dir, "scalars.json")
-        self.scalars = {}  # Dict[str, List[Dict[str, Any]]]
+        self.scalars = {}
+        self._step_counter = 0
+        self.flush_interval = flush_interval  # flush every N steps
 
-        self.video_writers = {}  # Dict[str, cv2.VideoWriter]
-        self.video_info = {}  # Dict[str, Dict[str, Any]]
+        self.video_writers = {}
+        self.video_info = {}
 
     def add_scalar(self, name, value, step):
         if name not in self.scalars:
@@ -62,19 +64,11 @@ class Logger:
             "value": value
         }
         self.scalars[name].append(log_entry)
-        self._write_scalars()  # Optional for frequent flushing
 
-    def add_frame_to_video(self, video_name, frame, fps=30):
-        """Adds a frame to a named video. Initializes video writer if needed."""
-        if video_name not in self.video_writers:
-            height, width = frame.shape[:2]
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            video_path = os.path.join(self.log_dir, f"{video_name}.avi")
-            writer = cv2.VideoWriter(video_path, fourcc, fps, (width, height))
-            self.video_writers[video_name] = writer
-            self.video_info[video_name] = {"fps": fps, "size": (width, height)}
-
-        self.video_writers[video_name].write(frame)
+        self._step_counter += 1
+        if self._step_counter >= self.flush_interval:
+            self._write_scalars()
+            self._step_counter = 0
 
     def _write_scalars(self):
         with open(self.scalar_log_path, 'w') as f:
@@ -85,8 +79,17 @@ class Logger:
         for writer in self.video_writers.values():
             writer.release()
 
+    def add_frame_to_video(self, video_name, frame, fps=30):
+        if video_name not in self.video_writers:
+            height, width = frame.shape[:2]
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            video_path = os.path.join(self.log_dir, f"{video_name}.avi")
+            writer = cv2.VideoWriter(video_path, fourcc, fps, (width, height))
+            self.video_writers[video_name] = writer
+            self.video_info[video_name] = {"fps": fps, "size": (width, height)}
+        self.video_writers[video_name].write(frame)
+
     def log_params(self, params: dict):
-        """Saves experiment or run parameters to a JSON file."""
         params_path = os.path.join(self.log_dir, "params.json")
         with open(params_path, 'w') as f:
             json.dump(params, f, indent=2)
