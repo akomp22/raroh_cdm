@@ -70,35 +70,36 @@ class Logger:
             "value": value
         }
         self.scalar_queue.put((name, log_entry))
+        # print(f"[Logger] Queued: {name} @ step {step}")
 
     def _scalar_writer_loop(self, queue, path):
         scalars = {}
-
         last_flush = time.time()
-        flush_interval = 1.0  # seconds
+        flush_interval = 1.0
 
         while True:
             try:
                 name, entry = queue.get(timeout=0.1)
+
+                if name == "__STOP__":
+                    break
+
                 if name not in scalars:
                     scalars[name] = []
                 scalars[name].append(entry)
 
-                if time.time() - last_flush > flush_interval:
-                    with open(path, 'w') as f:
-                        json.dump(scalars, f, indent=2)
-                    last_flush = time.time()
+            except:
+                pass  # queue timeout
 
-            except Exception:
-                # Timeout or queue empty
-                if not queue.empty():
-                    continue
-                if not queue._reader.poll():
-                    break
+            if time.time() - last_flush > flush_interval:
+                with open(path, 'w') as f:
+                    json.dump(scalars, f, indent=2)
+                last_flush = time.time()
 
         # Final flush
         with open(path, 'w') as f:
             json.dump(scalars, f, indent=2)
+
 
     def add_frame_to_video(self, video_name, frame, fps=30):
         if video_name not in self.video_writers:
@@ -116,11 +117,14 @@ class Logger:
             json.dump(params, f, indent=2)
 
     def close(self):
-        # Signal the writer to stop by closing the queue
-        print("Scalar writer process joined.")
-        self.scalar_writer.terminate()
-        print("Closing scalar queue...")
+        print("[Logger] Closing logger...")
+        self.scalar_queue.put(("__STOP__", None))
+        print("[Logger] Waiting for scalar writer to finish...")
+        self.scalar_writer.join()
+        print("[Logger] Scalar writer finished.")
+        print("[Logger] Closing scalar queue...")
         self.scalar_queue.close()
+        print("[Logger] Scalar queue closed.")
 
         for writer in self.video_writers.values():
             writer.release()
