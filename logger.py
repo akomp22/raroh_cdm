@@ -49,15 +49,6 @@ from datetime import datetime
 from multiprocessing import Process, Queue
 
 
-import os
-import time
-import json
-import cv2
-import threading
-from datetime import datetime
-from queue import Queue, Empty
-
-
 class Logger:
     def __init__(self, base_log_dir="flight_logs", flush_interval=1.0):
         timestamp = time.strftime("%Y%m%d_%H%M%S")
@@ -67,14 +58,12 @@ class Logger:
         self.scalar_log_path = os.path.join(self.log_dir, "scalars.json")
         self.scalar_queue = Queue()
         self.flush_interval = flush_interval
-        self.stop_event = threading.Event()
 
-        self.scalar_thread = threading.Thread(
+        self.scalar_writer_process = Process(
             target=self._scalar_writer_loop,
-            args=(self.scalar_queue, self.scalar_log_path, self.flush_interval, self.stop_event),
-            daemon=True
+            args=(self.scalar_queue, self.scalar_log_path, self.flush_interval)
         )
-        self.scalar_thread.start()
+        self.scalar_writer_process.start()
 
         self.video_writers = {}
         self.video_info = {}
@@ -86,33 +75,36 @@ class Logger:
             "step": step,
             "value": value
         }
-        self.scalar_queue.put(entry)
+        if self.scalar_queue is not None:
+            self.scalar_queue.put(entry)
 
-    def _scalar_writer_loop(self, queue, path, flush_interval, stop_event):
+    def _scalar_writer_loop(self, queue, path, flush_interval):
         scalars = {}
         last_flush = time.time()
 
-        while not stop_event.is_set():
+        while True:
             try:
-                while True:
-                    entry = queue.get_nowait()
-                    name = entry["name"]
-                    if name not in scalars:
-                        scalars[name] = []
-                    scalars[name].append({
-                        "timestamp": entry["timestamp"],
-                        "step": entry["step"],
-                        "value": entry["value"]
-                    })
-            except Empty:
-                pass
+                entry = queue.get(timeout=flush_interval)
+
+                if entry == "__STOP__":
+                    break
+
+                name = entry["name"]
+                if name not in scalars:
+                    scalars[name] = []
+                scalars[name].append({
+                    "timestamp": entry["timestamp"],
+                    "step": entry["step"],
+                    "value": entry["value"]
+                })
+
+            except:
+                pass  # Timeout
 
             if time.time() - last_flush >= flush_interval:
                 with open(path, 'w') as f:
                     json.dump(scalars, f, indent=2)
                 last_flush = time.time()
-
-            time.sleep(0.01)
 
         # Final flush
         with open(path, 'w') as f:
@@ -134,12 +126,14 @@ class Logger:
             json.dump(params, f, indent=2)
 
     def close(self):
-        self.stop_event.set()
-        self.scalar_thread.join()
+        if self.scalar_queue is not None:
+            self.scalar_queue.put("__STOP__")
+            self.scalar_queue.close()
+            self.scalar_queue.join_thread()
+            self.scalar_writer_process.join()
 
         for writer in self.video_writers.values():
             writer.release()
-
 
 if __name__ == "__main__":
     import numpy as np
