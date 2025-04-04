@@ -88,6 +88,7 @@ if __name__ == '__main__':
             # if time.time() - msg_rate_update_time > 1:
             #     mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_AOA_SSA, 1)
             #     msg_rate_update_time = time.time()
+            dt = time.time() - t1
             ret, frame = cam.get_frame()
             coord, mask_cleaned = find_red_spot_center(frame, cx, cy)
             t1 = time.time()
@@ -111,16 +112,16 @@ if __name__ == '__main__':
             angle_ch2_rad = np.arctan(coord_filtered[1] / fy)  # Vertical angle
 
             # visual guidance system
-            # aoa_ssa = mavlink_wrapper.messages["AOA_SSA"]
-            # aoa = aoa_ssa.AOA
-            # ssa = aoa_ssa.SSA
-            aoa = 0
-            ssa = 0
+            aoa_ssa = mavlink_wrapper.messages["AOA_SSA"]
+            aoa = aoa_ssa.AOA
+            ssa = aoa_ssa.SSA
+            # aoa = 0
+            # ssa = 0
             cmd_ch1 = pid_ch1.get_command(setpoint = ssa, current_value = angle_ch1_rad, current_time = time.time())
             cmd_ch2 = pid_ch2.get_command(setpoint = aoa, current_value = angle_ch2_rad, current_time = time.time())
 
             # PN system
-            dt = time.time() - t1
+            
             d_error_ch1 = (angle_ch1_rad - angle_ch1_rad_prev)  / dt if dt > 0 else 0.0
             d_error_ch2 = (angle_ch2_rad - angle_ch2_rad_prev)  / dt if dt > 0 else 0.0
 
