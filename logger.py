@@ -108,58 +108,67 @@ class Logger:
 
 
     def add_frame_to_video(self, video_name, frame, fps=30):
-        if self.video_queue.qsize() < 10:  # or use maxsize=100 when creating the queue
-            success, encoded = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
-            if success:
-                self.video_queue.put((video_name, encoded.tobytes(), fps))
-
+        # Compress the frame using JPEG
+        success, encoded = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+        if success:
+            try:
+                self.video_queue.put_nowait((video_name, encoded.tobytes(), fps))
+            except:
+                pass  # Queue full? Drop frame silently
     def _video_writer_loop(self, queue, log_dir):
         import cv2
+        import numpy as np
         import os
 
         writers = {}
-        try:
-            while True:
-                try:
-                    video_name, encoded_bytes, fps = queue.get()
-                    if video_name == "__STOP__":
-                        break
+        video_fps = {}
 
-                    height, width = frame.shape[:2]
-                    if video_name not in writers:
-                        fourcc = cv2.VideoWriter_fourcc(*'MJPG')  # MJPG for AVI format     
-                        path = os.path.join(log_dir, f"{video_name}.avi")
-                        writers[video_name] = cv2.VideoWriter(path, fourcc, fps, (width, height))
+        while True:
+            try:
+                video_name, encoded_bytes, fps = queue.get(timeout=0.2)
 
-                    writers[video_name].write(frame)
+                if video_name == "__STOP__":
+                    break
 
-                except Exception as e:
-                    # catch queue timeout, EOFError, etc.
+                # Decode the frame
+                frame = cv2.imdecode(np.frombuffer(encoded_bytes, np.uint8), cv2.IMREAD_COLOR)
+                if frame is None:
                     continue
 
-        except (KeyboardInterrupt, EOFError):
-            print("[VideoWriter] Interrupted.")
+                height, width = frame.shape[:2]
 
-        finally:
-            for writer in writers.values():
-                writer.release()
-            print("[VideoWriter] Clean exit.")
+                if video_name not in writers:
+                    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+                    video_path = os.path.join(log_dir, f"{video_name}.avi")
+                    writers[video_name] = cv2.VideoWriter(video_path, fourcc, fps, (width, height))
+                    video_fps[video_name] = fps
+
+                writers[video_name].write(frame)
+
+            except Exception as e:
+                continue  # Timeouts or decoding errors
+
+        # Release all writers on shutdown
+        for writer in writers.values():
+            writer.release()
+        print("[VideoWriter] Clean exit")
 
 
     def log_params(self, params: dict):
         params_path = os.path.join(self.log_dir, "params.json")
         with open(params_path, 'w') as f:
             json.dump(params, f, indent=2)
-
     def close(self):
-        # Scalar logger
-        self.scalar_queue.put(("__STOP__", None))
-        self.scalar_writer.join()
-        self.scalar_queue.close()
+        try:
+            self.scalar_queue.put(("__STOP__", None))
+            self.video_queue.put(("__STOP__", None, None))
+        except:
+            pass
 
-        # Video logger
-        self.video_queue.put(("__STOP__", None, None))
-        self.video_writer.join()
+        self.scalar_writer.join(timeout=5)
+        self.video_writer.join(timeout=5)
+
+        self.scalar_queue.close()
         self.video_queue.close()
 
 
