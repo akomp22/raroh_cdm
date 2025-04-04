@@ -3,6 +3,7 @@ import numpy as np
 import threading
 from queue import Queue
 import time
+import pickle
 
 class Camera():
     def __init__(self, type, camera_id="/dev/video0", video_path=None, resolution=(640, 480)): 
@@ -97,6 +98,13 @@ class Camera():
                                                                                                                 self.x_roi:self.x_roi+self.w_roi]
         return frame_undist_roi
     
+    @staticmethod
+    def read_params(folder):
+        with open(f'{folder}/cameraMatrix.pkl', 'rb') as f:
+            cameraMatrix = pickle.load(f)
+        with open(f'{folder}/dist.pkl', 'rb') as f:
+            dist = pickle.load(f)
+        return cameraMatrix, dist
 
 
 if __name__ == "__main__":
@@ -104,7 +112,16 @@ if __name__ == "__main__":
     input_video = "data_inputs/1.mp4"
     output_video = "data_outputs/1.avi"
 
-    cam = Camera(type="windows",video_path=input_video, camera_id="1", resolution=(320, 240))
+    cam = Camera(type="windows",video_path=input_video, camera_id="1", resolution=(640, 320))
+
+    matrix, dist = cam.read_params(folder = "params_rpi_0")
+    # cam.init_undiostort(matrix, dist)
+    # camera_matrix = cam.optimalCameraMatrix
+    fx = matrix[0, 0]
+    fy = matrix[1, 1]
+    cx = matrix[0, 2]
+    cy = matrix[1, 2]
+    print(f"fx: {fx}, fy: {fy}, cx: {cx}, cy: {cy}")
 
     ret, frame = cam.get_frame()
     if not ret:

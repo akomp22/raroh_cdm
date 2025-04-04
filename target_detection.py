@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from camera import Camera
 
-def find_red_spot_center(frame):
+def find_red_spot_center(frame, cx, cy):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     lower_red1 = np.array([0, 120, 90])
@@ -27,10 +27,10 @@ def find_red_spot_center(frame):
         largest = max(contours, key=cv2.contourArea)
         M = cv2.moments(largest)
         if M["m00"] != 0:
-            cx = int(M["m10"] / M["m00"])
-            cy = int(M["m01"] / M["m00"])
-            height, width = frame.shape[:2]
-            return (cx - width // 2, cy - height // 2), mask_cleaned
+            x = int(M["m10"] / M["m00"])
+            y = int(M["m01"] / M["m00"])
+            # height, width = frame.shape[:2]
+            return (x - cx, y - cy), mask_cleaned
     return None, mask_cleaned
 
 if __name__ == "__main__":
