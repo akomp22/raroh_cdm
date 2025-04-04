@@ -21,7 +21,7 @@ if __name__ == '__main__':
     MAC_CH2 = 1800
     MIN_CH1 = 1200
 
-    SAVE_DATA = False
+    SAVE_DATA = True
 
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
@@ -114,11 +114,11 @@ if __name__ == '__main__':
             angle_ch2_rad = np.arctan(coord_filtered[1] / fy)  # Vertical angle
 
             # visual guidance system
-            # aoa_ssa = mavlink_wrapper.messages["AOA_SSA"]
-            # aoa = aoa_ssa.AOA
-            # ssa = aoa_ssa.SSA
-            aoa = 0
-            ssa = 0
+            aoa_ssa = mavlink_wrapper.messages["AOA_SSA"]
+            aoa = aoa_ssa.AOA
+            ssa = aoa_ssa.SSA
+            # aoa = 0
+            # ssa = 0
             cmd_ch1 = pid_ch1.get_command(setpoint = ssa, current_value = angle_ch1_rad, current_time = time.time())
             cmd_ch2 = pid_ch2.get_command(setpoint = aoa, current_value = angle_ch2_rad, current_time = time.time())
 
