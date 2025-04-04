@@ -83,10 +83,10 @@ class Logger:
         last_flush = time.time()
 
         while True:
-            flushed = False
             try:
-                # Non-blocking queue read with timeout
                 entry = queue.get(timeout=flush_interval)
+                if entry == "__STOP__":
+                    break  # Clean exit
                 name = entry["name"]
                 if name not in scalars:
                     scalars[name] = []
@@ -96,23 +96,17 @@ class Logger:
                     "value": entry["value"]
                 })
             except:
-                pass  # timeout
+                pass  # Timeout or queue empty
 
-            # Flush if interval passed
             if time.time() - last_flush >= flush_interval:
                 with open(path, 'w') as f:
                     json.dump(scalars, f, indent=2)
                 last_flush = time.time()
-                flushed = True
 
-            # Exit when queue is closed and empty
-            if not queue._reader.poll() and queue.empty():
-                break
-
-        # Final write
+        # Final flush
         with open(path, 'w') as f:
             json.dump(scalars, f, indent=2)
-
+            
     def add_frame_to_video(self, video_name, frame, fps=30):
         if video_name not in self.video_writers:
             height, width = frame.shape[:2]
