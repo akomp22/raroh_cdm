@@ -50,8 +50,8 @@ if __name__ == "__main__":
     os.makedirs(test_dir, exist_ok=True)
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out_frame = cv2.VideoWriter("test_videos/camera_output.avi", fourcc, 30.0, (width, height))
-    out_mask = cv2.VideoWriter("test_videos/mask_output.avi", fourcc, 30.0, (width, height), isColor=False)
+    out_frame = cv2.VideoWriter(test_dir, fourcc, 30.0, (width, height))
+    out_mask = cv2.VideoWriter(test_dir, fourcc, 30.0, (width, height), isColor=False)
 
     frame_count = 0
     start_time = time.time()
