@@ -13,10 +13,10 @@ if __name__ == '__main__':
     coord_alpha = 0.5
     reversed_ch1 = True
     reversed_ch2 = False
-    max_ch1 = 1700
-    min_ch1 = 1300 
-    max_ch2 = 1700
-    min_ch2 = 1300
+    max_ch1 = 1800
+    min_ch1 = 1200 
+    max_ch2 = 1800
+    min_ch2 = 1200
 
     mavlink_wrapper = MavlinkWrapper(connection_string, source_system = source_system, data_list = ['AOA_SSA'])
     mavlink_wrapper.connect()
@@ -44,8 +44,8 @@ if __name__ == '__main__':
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
 
-    pid_ch1 = PIDFFController(Kp = 5000, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
-    pid_ch2 = PIDFFController(Kp = 7000, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
+    pid_ch1 = PIDFFController(Kp = 7000, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
+    pid_ch2 = PIDFFController(Kp = 9000, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
 
     ret, frame = cam.get_frame()
     
