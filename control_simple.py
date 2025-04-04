@@ -146,22 +146,22 @@ if __name__ == '__main__':
             print(f"angle_x_rad {angle_ch1_rad:.3f} angle_y_rad {angle_ch2_rad:.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}; fps {1/dt:.2f}")
             mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_ch1, cmd_ch2])
 
-            if SAVE_DATA:
-                logger.add_scalar("cmd_ch1", cmd_ch1, time.time())
-                logger.add_scalar("cmd_ch2", cmd_ch2, time.time())
-                logger.add_scalar("angle_ch1_rad", angle_ch1_rad, time.time())
-                logger.add_scalar("angle_ch2_rad", angle_ch2_rad, time.time())
-                logger.add_scalar("coord_x", coord[0], time.time())
-                logger.add_scalar("coord_y", coord[1], time.time())
-                logger.add_scalar("coord_x_filtered", coord_filtered[0], time.time())
-                logger.add_scalar("coord_y_filtered", coord_filtered[1], time.time())
-                logger.add_scalar("aoa", aoa, time.time())
-                logger.add_scalar("ssa", ssa, time.time())
-                logger.add_scalar("pn_term_ch1", pn_term_ch1, time.time())
-                logger.add_scalar("pn_term_ch2", pn_term_ch2, time.time())
-                logger.add_scalar("d_error_ch1", d_error_ch1, time.time())
-                logger.add_scalar("d_error_ch2", d_error_ch2, time.time())
-                logger.add_scalar("dt", dt, time.time())
+            # if SAVE_DATA:
+            #     logger.add_scalar("cmd_ch1", cmd_ch1, time.time())
+            #     logger.add_scalar("cmd_ch2", cmd_ch2, time.time())
+            #     logger.add_scalar("angle_ch1_rad", angle_ch1_rad, time.time())
+            #     logger.add_scalar("angle_ch2_rad", angle_ch2_rad, time.time())
+            #     logger.add_scalar("coord_x", coord[0], time.time())
+            #     logger.add_scalar("coord_y", coord[1], time.time())
+            #     logger.add_scalar("coord_x_filtered", coord_filtered[0], time.time())
+            #     logger.add_scalar("coord_y_filtered", coord_filtered[1], time.time())
+            #     logger.add_scalar("aoa", aoa, time.time())
+            #     logger.add_scalar("ssa", ssa, time.time())
+            #     logger.add_scalar("pn_term_ch1", pn_term_ch1, time.time())
+            #     logger.add_scalar("pn_term_ch2", pn_term_ch2, time.time())
+            #     logger.add_scalar("d_error_ch1", d_error_ch1, time.time())
+            #     logger.add_scalar("d_error_ch2", d_error_ch2, time.time())
+            #     logger.add_scalar("dt", dt, time.time())
 
                 # # add coord to the frame
                 # if coord:
