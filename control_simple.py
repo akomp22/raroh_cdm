@@ -38,8 +38,8 @@ if __name__ == '__main__':
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
 
-    pid_ch1 = PIDFFController(Kp = 5000, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode=None)
-    pid_ch2 = PIDFFController(Kp = 5000, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode=None)
+    pid_ch1 = PIDFFController(Kp = 1000, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
+    pid_ch2 = PIDFFController(Kp = 1000, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
 
     ret, frame = cam.get_frame()
     
@@ -71,12 +71,12 @@ if __name__ == '__main__':
         cmd_x = pid_ch1.get_command(setpoint = 0, current_value = angle_x_rad, current_time = time.time())
         cmd_y = pid_ch2.get_command(setpoint = 0, current_value = angle_y_rad, current_time = time.time())
 
-        cmd_x = rc1_trim+cmd_x
-        cmd_y = rc2_trim+cmd_y
+        cmd_x = int(rc1_trim+cmd_x)
+        cmd_y = int(rc2_trim+cmd_y)
         cmd_x = max(min(cmd_x, 2000), 1000)
         cmd_y = max(min(cmd_y, 2000), 1000)
-        print(f"angle_x_rad {angle_x_rad:.3f} angle_y_rad {angle_y_rad:.3f}; {cmd_x}; cmd y {cmd_y}")
-        mavlink_wrapper.set_rc_channel_pwm([1,2], [int(cmd_x), int(cmd_y)])
+        print(f"angle_x_rad {angle_x_rad:.3f} angle_y_rad {angle_y_rad:.3f}; cmd x {cmd_x}; cmd y {cmd_y}")
+        mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_x, cmd_y])
 
 
 
