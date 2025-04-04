@@ -41,43 +41,64 @@ def json_to_excel(json_path, excel_path):
 
 
 
+from multiprocessing import Process, Queue
+from datetime import datetime
+import json
+import time
+import os
+import cv2
+
+
 class Logger:
-    def __init__(self, base_log_dir="flight_logs", flush_interval=100):
+    def __init__(self, base_log_dir="flight_logs"):
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         self.log_dir = os.path.join(base_log_dir, timestamp)
         os.makedirs(self.log_dir, exist_ok=True)
 
         self.scalar_log_path = os.path.join(self.log_dir, "scalars.json")
-        self.scalars = {}
-        self._step_counter = 0
-        self.flush_interval = flush_interval  # flush every N steps
+        self.scalar_queue = Queue()
+        self.scalar_writer = Process(target=self._scalar_writer_loop, args=(self.scalar_queue, self.scalar_log_path))
+        self.scalar_writer.start()
 
         self.video_writers = {}
         self.video_info = {}
 
     def add_scalar(self, name, value, step):
-        if name not in self.scalars:
-            self.scalars[name] = []
         log_entry = {
             "timestamp": datetime.utcnow().isoformat(),
             "step": step,
             "value": value
         }
-        self.scalars[name].append(log_entry)
+        self.scalar_queue.put((name, log_entry))
 
-        self._step_counter += 1
-        if self._step_counter >= self.flush_interval:
-            self._write_scalars()
-            self._step_counter = 0
+    def _scalar_writer_loop(self, queue, path):
+        scalars = {}
 
-    def _write_scalars(self):
-        with open(self.scalar_log_path, 'w') as f:
-            json.dump(self.scalars, f, indent=2)
+        last_flush = time.time()
+        flush_interval = 1.0  # seconds
 
-    def close(self):
-        self._write_scalars()
-        for writer in self.video_writers.values():
-            writer.release()
+        while True:
+            try:
+                name, entry = queue.get(timeout=0.1)
+                if name not in scalars:
+                    scalars[name] = []
+                scalars[name].append(entry)
+
+                if time.time() - last_flush > flush_interval:
+                    with open(path, 'w') as f:
+                        json.dump(scalars, f, indent=2)
+                    last_flush = time.time()
+
+            except Exception:
+                # Timeout or queue empty
+                if not queue.empty():
+                    continue
+                if not queue._reader.poll():
+                    break
+
+        # Final flush
+        with open(path, 'w') as f:
+            json.dump(scalars, f, indent=2)
 
     def add_frame_to_video(self, video_name, frame, fps=30):
         if video_name not in self.video_writers:
@@ -93,6 +114,16 @@ class Logger:
         params_path = os.path.join(self.log_dir, "params.json")
         with open(params_path, 'w') as f:
             json.dump(params, f, indent=2)
+
+    def close(self):
+        # Signal the writer to stop by closing the queue
+        self.scalar_queue.close()
+        self.scalar_queue.join_thread()
+        self.scalar_writer.join()
+
+        for writer in self.video_writers.values():
+            writer.release()
+
 
 if __name__ == "__main__":
     import numpy as np
