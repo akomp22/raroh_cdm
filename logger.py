@@ -117,10 +117,16 @@ class Logger:
 
     def close(self):
         # Signal the writer to stop by closing the queue
+        print("Closing scalar queue...")
         self.scalar_queue.close()
+        print("Joining scalar queue thread...")
         self.scalar_queue.join_thread()
+        print("Joining scalar writer process...")
         self.scalar_writer.join()
+        print("Scalar writer process joined.")
         self.scalar_writer.terminate()
+        print("Scalar writer process terminated.")
+        print("Releasing video writers...")
 
         for writer in self.video_writers.values():
             writer.release()
