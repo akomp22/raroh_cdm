@@ -37,6 +37,7 @@ if __name__ == "__main__":
     import sys
     import os
     import time
+    import datetime
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
     ret, frame = cam.get_frame()
@@ -44,9 +45,11 @@ if __name__ == "__main__":
     print(height, width)
     time.sleep(2)
 
+    test_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    test_dir = f"target_test_videos/{test_time}"
+    os.makedirs(test_dir, exist_ok=True)
+
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    if not os.path.exists("test_videos"):
-        os.makedirs("test_videos")
     out_frame = cv2.VideoWriter("test_videos/camera_output.avi", fourcc, 30.0, (width, height))
     out_mask = cv2.VideoWriter("test_videos/mask_output.avi", fourcc, 30.0, (width, height), isColor=False)
 
@@ -55,6 +58,7 @@ if __name__ == "__main__":
     try:
         while True:
             ret, frame = cam.get_frame()
+            timestamp_str = datetime.now().strftime("%H:%M:%S.%f")[:-3]
             coord, mask_cleaned = find_red_spot_center(frame)
 
             # Calculate FPS (instant per frame)
@@ -64,13 +68,17 @@ if __name__ == "__main__":
             if frame_count % 10 == 0:
                 print(f"Coordinates: {coord}, FPS: {fps:.2f}")
 
-            # if coord:
-            #     disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
-            #     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
-            #     cv2.circle(mask_cleaned, disp_coord, 5, (255), -1)
+            if coord:
+                disp_coord = (coord[0] + width // 2, coord[1] + height // 2)
+                cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
+                cv2.circle(mask_cleaned, disp_coord, 5, (255), -1)
 
-            # out_frame.write(frame)
-            # out_mask.write(mask_cleaned)
+            label = f"Frame: {frame_count}, Time: {timestamp_str}"
+            cv2.putText(frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            cv2.putText(mask_cleaned, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255), 2)
+
+            out_frame.write(frame)
+            out_mask.write(mask_cleaned)
             frame_count += 1
 
             # # Optional: Show live preview

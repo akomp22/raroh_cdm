@@ -1110,26 +1110,58 @@ class MavlinkWrapper:
 #         print(read_rc_channel)
 
 if __name__ == "__main__":
-    connection_string = '/dev/ttyACM0'  
+    import time
+    # connection_string = '/dev/ttyACM0'  
+    connection_string = 'COM13'  
     # connection_string = "udpin:localhost:14551"
     source_system = 255
-    mavlink_wrapper = MavlinkWrapper(connection_string, source_system=source_system)
+    mavlink_wrapper = MavlinkWrapper(connection_string, source_system=source_system, data_list=['AOA_SSA'])
+    
     mavlink_wrapper.connect()
-    mavlink_wrapper.set_mode('FBWA') 
-    # mavlink_wrapper.run_telemetry_parralel()
-    mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_RC_CHANNELS, 1)
-    mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_SERVO_OUTPUT_RAW, 1)
-    # mavlink_wrapper.set_mode('MANUAL')
-    mavlink_wrapper.connection.mav.rc_channels_override_send(
-        mavlink_wrapper.connection.target_system,
-        mavlink_wrapper.connection.target_component,
-        1500, 1500, 1500, 1500, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0  # Fill rest with zeros
-    )
+    mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_AOA_SSA, 1)
+
+    last_time = None
+    msg_count = 0
+    sum_dt = 0
     while True:
-        mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_SERVO_OUTPUT_RAW, 1)
-        mavlink_wrapper.set_rc_channel_pwm([1,2], [1300,1300])
-        msg = mavlink_wrapper.connection.recv_match(type='RC_CHANNELS', blocking=True, timeout=0.1)
-        if msg:
-            print(f"RC1={msg.chan1_raw}; RC2={msg.chan2_raw}; RC3={msg.chan3_raw}; RC3={msg.chan4_raw}")
-        time.sleep(0.1)
+        msg = mavlink_wrapper.connection.recv_msg()
+        if msg is not None:
+            msg_type = msg.get_type()
+            if msg_type == 'AOA_SSA':
+                now = time.time()
+                if last_time is not None:
+                    dt = now - last_time
+                    freq = 1.0 / dt if dt > 0 else 0
+                    print(f"AOA_SSA received | freq: {freq:.2f} Hz | AOA: {msg.AOA:.2f} | SSA: {msg.SSA:.2f}")
+                    sum_dt += dt
+                    msg_count += 1
+                    if msg_count >= 10:
+                        avg_freq = 1.0 / (sum_dt / msg_count)
+                        print(f"Average frequency over last {msg_count} messages: {avg_freq:.2f} Hz")
+                        msg_count = 0
+                        sum_dt = 0
+                else:
+                    print("First AOA_SSA message received.")
+                last_time = now
+
+
+
+
+    # mavlink_wrapper.set_mode('FBWA') 
+    # # mavlink_wrapper.run_telemetry_parralel()
+    # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_RC_CHANNELS, 1)
+    # mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_SERVO_OUTPUT_RAW, 1)
+    # # mavlink_wrapper.set_mode('MANUAL')
+    # mavlink_wrapper.connection.mav.rc_channels_override_send(
+    #     mavlink_wrapper.connection.target_system,
+    #     mavlink_wrapper.connection.target_component,
+    #     1500, 1500, 1500, 1500, 0, 0, 0, 0,
+    #     0, 0, 0, 0, 0, 0, 0, 0  # Fill rest with zeros
+    # )
+    # while True:
+    #     mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_SERVO_OUTPUT_RAW, 1)
+    #     mavlink_wrapper.set_rc_channel_pwm([1,2], [1300,1300])
+    #     msg = mavlink_wrapper.connection.recv_match(type='RC_CHANNELS', blocking=True, timeout=0.1)
+    #     if msg:
+    #         print(f"RC1={msg.chan1_raw}; RC2={msg.chan2_raw}; RC3={msg.chan3_raw}; RC3={msg.chan4_raw}")
+    #     time.sleep(0.1)
