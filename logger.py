@@ -79,36 +79,42 @@ class Logger:
             self.scalar_queue.put(entry)
 
     def _scalar_writer_loop(self, queue, path, flush_interval):
+        import queue as pyqueue  # needed for Empty exception
         scalars = {}
         last_flush = time.time()
 
         while True:
             try:
-                entry = queue.get(timeout=flush_interval)
+                while True:
+                    entry = queue.get_nowait()
 
-                if entry == "__STOP__":
-                    break
+                    if entry == "__STOP__":
+                        raise StopIteration
 
-                name = entry["name"]
-                if name not in scalars:
-                    scalars[name] = []
-                scalars[name].append({
-                    "timestamp": entry["timestamp"],
-                    "step": entry["step"],
-                    "value": entry["value"]
-                })
+                    name = entry["name"]
+                    if name not in scalars:
+                        scalars[name] = []
+                    scalars[name].append({
+                        "timestamp": entry["timestamp"],
+                        "step": entry["step"],
+                        "value": entry["value"]
+                    })
 
-            except:
-                pass  # Timeout
+            except pyqueue.Empty:
+                pass  # nothing to read right now
 
+            # Periodically flush to disk
             if time.time() - last_flush >= flush_interval:
                 with open(path, 'w') as f:
                     json.dump(scalars, f, indent=2)
                 last_flush = time.time()
 
-        # Final flush
+            time.sleep(0.01)  # short sleep to prevent busy waiting
+
+        # Final flush (after "__STOP__" signal)
         with open(path, 'w') as f:
             json.dump(scalars, f, indent=2)
+
 
     def add_frame_to_video(self, video_name, frame, fps=30):
         if video_name not in self.video_writers:
