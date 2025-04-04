@@ -83,7 +83,7 @@ if __name__ == '__main__':
     time.sleep(4)
     try:
         while True:
-            if time.time() - msg_rate_update_time > 0.7:
+            if time.time() - msg_rate_update_time > 1:
                 mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_AOA_SSA, 1)
                 msg_rate_update_time = time.time()
             ret, frame = cam.get_frame()
