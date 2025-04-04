@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
-
+    time.sleep(4)
     camera_matrix, dist_coeffs = Camera.read_params(folder = "params_rpi_0")
     cam.init_undiostort(camera_matrix, dist_coeffs)
 
