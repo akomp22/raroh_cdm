@@ -84,8 +84,10 @@ if __name__ == '__main__':
     angle_ch2_rad_prev = 0.0
     time.sleep(4)
     t1 = time.time()
+    n = 0
     try:
         while True:
+            n = n + 1
             # if time.time() - msg_rate_update_time > 1:
             #     mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_AOA_SSA, 1)
             #     msg_rate_update_time = time.time()
@@ -147,26 +149,30 @@ if __name__ == '__main__':
             mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_ch1, cmd_ch2])
 
             if SAVE_DATA:
-                logger.add_scalar("cmd_ch1", cmd_ch1, time.time())
-                logger.add_scalar("cmd_ch2", cmd_ch2, time.time())
-                logger.add_scalar("angle_ch1_rad", angle_ch1_rad, time.time())
-                logger.add_scalar("angle_ch2_rad", angle_ch2_rad, time.time())
-                logger.add_scalar("coord_x", coord[0], time.time())
-                logger.add_scalar("coord_y", coord[1], time.time())
-                logger.add_scalar("coord_x_filtered", coord_filtered[0], time.time())
-                logger.add_scalar("coord_y_filtered", coord_filtered[1], time.time())
-                logger.add_scalar("aoa", aoa, time.time())
-                logger.add_scalar("ssa", ssa, time.time())
-                logger.add_scalar("pn_term_ch1", pn_term_ch1, time.time())
-                logger.add_scalar("pn_term_ch2", pn_term_ch2, time.time())
-                logger.add_scalar("d_error_ch1", d_error_ch1, time.time())
-                logger.add_scalar("d_error_ch2", d_error_ch2, time.time())
-                logger.add_scalar("dt", dt, time.time())
+                logger.add_scalar("cmd_ch1", cmd_ch1, n)
+                logger.add_scalar("cmd_ch2", cmd_ch2, n)
+                logger.add_scalar("angle_ch1_rad", angle_ch1_rad, n)
+                logger.add_scalar("angle_ch2_rad", angle_ch2_rad, n)
+                logger.add_scalar("coord_x", coord[0], n)
+                logger.add_scalar("coord_y", coord[1], n)
+                logger.add_scalar("coord_x_filtered", coord_filtered[0], n)
+                logger.add_scalar("coord_y_filtered", coord_filtered[1], n)
+                logger.add_scalar("aoa", aoa, n)
+                logger.add_scalar("ssa", ssa, n)
+                logger.add_scalar("pn_term_ch1", pn_term_ch1,n)
+                logger.add_scalar("pn_term_ch2", pn_term_ch2, n)
+                logger.add_scalar("d_error_ch1", d_error_ch1, n)
+                logger.add_scalar("d_error_ch2", d_error_ch2, n)
+                logger.add_scalar("dt", dt, n)
 
                 # add coord to the frame
                 if coord:
                     disp_coord = (int(coord[0] + cx), int(coord[1] + cy))
                     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
+                # add frame number and timestamp
+                label = f"Time: {time.time():.3f}"
+                label += f"  |  Frame: {n}"
+                cv2.putText(frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
                 logger.add_frame_to_video("frame", frame, fps=30)
     except KeyboardInterrupt:
         logger.close()
