@@ -83,15 +83,17 @@ if __name__ == '__main__':
     angle_ch1_rad_prev = 0.0
     angle_ch2_rad_prev = 0.0
     time.sleep(4)
+    t1 = time.time()
     try:
         while True:
             # if time.time() - msg_rate_update_time > 1:
             #     mavlink_wrapper.set_message_rate(mavutil.mavlink.MAVLINK_MSG_ID_AOA_SSA, 1)
             #     msg_rate_update_time = time.time()
             dt = time.time() - t1
+            t1 = time.time()
             ret, frame = cam.get_frame()
             coord, mask_cleaned = find_red_spot_center(frame, cx, cy)
-            t1 = time.time()
+            
 
             # droput protection
             last_seen_time = time.time()
