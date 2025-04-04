@@ -163,11 +163,11 @@ if __name__ == '__main__':
                 logger.add_scalar("d_error_ch2", d_error_ch2, time.time())
                 logger.add_scalar("dt", dt, time.time())
 
-                # # add coord to the frame
-                # if coord:
-                #     disp_coord = (int(coord[0] + cx), int(coord[1] + cy))
-                #     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
-                # logger.add_frame_to_video("frame", frame, fps=30)
+                # add coord to the frame
+                if coord:
+                    disp_coord = (int(coord[0] + cx), int(coord[1] + cy))
+                    cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
+                logger.add_frame_to_video("frame", frame, fps=30)
     except KeyboardInterrupt:
         logger.close()
         mavlink_wrapper.close()

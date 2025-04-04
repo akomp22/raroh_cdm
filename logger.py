@@ -55,13 +55,19 @@ class Logger:
         self.log_dir = os.path.join(base_log_dir, timestamp)
         os.makedirs(self.log_dir, exist_ok=True)
 
+        # Scalar Logging
         self.scalar_log_path = os.path.join(self.log_dir, "scalars.json")
         self.scalar_queue = Queue()
         self.scalar_writer = Process(target=self._scalar_writer_loop, args=(self.scalar_queue, self.scalar_log_path))
         self.scalar_writer.start()
 
-        self.video_writers = {}
-        self.video_info = {}
+        # Video Logging
+        self.video_queue = Queue()
+        self.video_writer = Process(target=self._video_writer_loop, args=(self.video_queue, self.log_dir))
+        self.video_writer.start()
+
+        self.video_writers = {}  # not used here anymore
+        self.video_info = {}     # just for completeness
 
     def add_scalar(self, name, value, step):
         log_entry = {
@@ -102,14 +108,33 @@ class Logger:
 
 
     def add_frame_to_video(self, video_name, frame, fps=30):
-        if video_name not in self.video_writers:
-            height, width = frame.shape[:2]
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            video_path = os.path.join(self.log_dir, f"{video_name}.avi")
-            writer = cv2.VideoWriter(video_path, fourcc, fps, (width, height))
-            self.video_writers[video_name] = writer
-            self.video_info[video_name] = {"fps": fps, "size": (width, height)}
-        self.video_writers[video_name].write(frame)
+        self.video_queue.put((video_name, frame, fps))
+
+    def _video_writer_loop(self, queue, log_dir):
+        import cv2
+        writers = {}
+
+        while True:
+            try:
+                video_name, frame, fps = queue.get()
+                if video_name == "__STOP__":
+                    break
+
+                height, width = frame.shape[:2]
+                if video_name not in writers:
+                    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                    path = os.path.join(log_dir, f"{video_name}.avi")
+                    writers[video_name] = cv2.VideoWriter(path, fourcc, fps, (width, height))
+
+                writers[video_name].write(frame)
+
+            except Exception as e:
+                print(f"[VideoWriter] Error: {e}")
+
+        # Cleanup
+        for writer in writers.values():
+            writer.release()
+
 
     def log_params(self, params: dict):
         params_path = os.path.join(self.log_dir, "params.json")
@@ -117,17 +142,16 @@ class Logger:
             json.dump(params, f, indent=2)
 
     def close(self):
-        print("[Logger] Closing logger...")
+        # Scalar logger
         self.scalar_queue.put(("__STOP__", None))
-        print("[Logger] Waiting for scalar writer to finish...")
         self.scalar_writer.join()
-        print("[Logger] Scalar writer finished.")
-        print("[Logger] Closing scalar queue...")
         self.scalar_queue.close()
-        print("[Logger] Scalar queue closed.")
 
-        for writer in self.video_writers.values():
-            writer.release()
+        # Video logger
+        self.video_queue.put(("__STOP__", None, None))
+        self.video_writer.join()
+        self.video_queue.close()
+
 
 
 if __name__ == "__main__":
