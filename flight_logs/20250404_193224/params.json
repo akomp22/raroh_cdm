@@ -1,0 +1,12 @@
+{
+  "Kp_ch1": 8000,
+  "Kp_ch2": 8000,
+  "coord_alpha": 0.99,
+  "nav_gain": 0,
+  "reversed_ch1": true,
+  "reversed_ch2": false,
+  "max_ch1": 1800,
+  "min_ch1": 1200,
+  "max_ch2": 1800,
+  "min_ch2": 1200
+}
