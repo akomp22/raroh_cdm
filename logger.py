@@ -112,28 +112,36 @@ class Logger:
 
     def _video_writer_loop(self, queue, log_dir):
         import cv2
+        import os
+
         writers = {}
+        try:
+            while True:
+                try:
+                    video_name, frame, fps = queue.get(timeout=0.1)
 
-        while True:
-            try:
-                video_name, frame, fps = queue.get()
-                if video_name == "__STOP__":
-                    break
+                    if video_name == "__STOP__":
+                        break
 
-                height, width = frame.shape[:2]
-                if video_name not in writers:
-                    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-                    path = os.path.join(log_dir, f"{video_name}.avi")
-                    writers[video_name] = cv2.VideoWriter(path, fourcc, fps, (width, height))
+                    height, width = frame.shape[:2]
+                    if video_name not in writers:
+                        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                        path = os.path.join(log_dir, f"{video_name}.avi")
+                        writers[video_name] = cv2.VideoWriter(path, fourcc, fps, (width, height))
 
-                writers[video_name].write(frame)
+                    writers[video_name].write(frame)
 
-            except Exception as e:
-                print(f"[VideoWriter] Error: {e}")
+                except Exception as e:
+                    # catch queue timeout, EOFError, etc.
+                    continue
 
-        # Cleanup
-        for writer in writers.values():
-            writer.release()
+        except (KeyboardInterrupt, EOFError):
+            print("[VideoWriter] Interrupted.")
+
+        finally:
+            for writer in writers.values():
+                writer.release()
+            print("[VideoWriter] Clean exit.")
 
 
     def log_params(self, params: dict):
