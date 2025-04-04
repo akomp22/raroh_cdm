@@ -30,8 +30,8 @@ if __name__ == '__main__':
     )
     ##################################################
 
-    rc1_trim = mavlink_wrapper.get_param('RC1_TRIM')
-    rc2_trim = mavlink_wrapper.get_param('RC2_TRIM')
+    rc1_trim = mavlink_wrapper.read_parameter('RC1_TRIM')
+    rc2_trim = mavlink_wrapper.read_parameter('RC2_TRIM')
     print(f"RC1_TRIM: {rc1_trim}, RC2_TRIM: {rc2_trim}")
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
