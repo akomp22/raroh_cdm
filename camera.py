@@ -40,6 +40,7 @@ class Camera():
             try:
                 config = self.picam2.create_video_configuration(
                     main={"size": self.resolution, "format": "YUV420"},
+                    raw={"size": (2304, 1296)},
                     controls={"FrameRate": 120}
                 )
                 self.picam2.configure(config)
