@@ -77,7 +77,8 @@ class Camera():
             return ret,frame
         elif self.type == 'rpi':
             frame = self.picam2.capture_array('main')
-            frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+            # frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+            # frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GBR)
             # frame = frame[:480,:]
             return True, frame
     
