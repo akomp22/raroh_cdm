@@ -76,7 +76,7 @@ class Camera():
                 print("Error reading frame")
             return ret,frame
         elif self.type == 'rpi':
-            frame = self.picam2.capture_array('main', wait=False, raw=False, format='YUV420')
+            frame = self.picam2.capture_array('main', wait=False)
             frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             # frame = frame[:480,:]
             return True, frame
