@@ -153,7 +153,7 @@ if __name__ == '__main__':
             cmd_ch2 = int(rc2_trim+cmd_ch2)
             cmd_ch1 = max(min(cmd_ch1, MAX_CH1), MIN_CH1)
             cmd_ch2 = max(min(cmd_ch2, MAX_CH2), MIN_CH1)
-            print(f"angle_x {np.deg2rad(angle_ch1_rad):.3f} angle_y_rad {np.deg2rad(angle_ch2_rad):.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}; fps {1/dt:.2f}")
+            print(f"angle_x {np.rad2deg(angle_ch1_rad):.3f} angle_y_rad {np.rad2deg(angle_ch2_rad):.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}; fps {1/dt:.2f}")
             mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_ch1, cmd_ch2])
 
             if SAVE_DATA:
