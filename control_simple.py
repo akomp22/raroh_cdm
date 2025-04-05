@@ -41,8 +41,8 @@ if __name__ == '__main__':
     # cy = camera_matrix[1, 2]
     fx = 230
     fy = 230
-    cx = 320
-    cy = 240
+    cx = 320//2
+    cy = 240//2
     print(f"fx: {fx}, fy: {fy}, cx: {cx}, cy: {cy}")
 
     pid_ch1 = PIDFFController(Kp = KP_CH1, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
