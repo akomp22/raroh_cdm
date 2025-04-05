@@ -39,7 +39,7 @@ if __name__ == "__main__":
     import time
     from datetime import datetime
 
-    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
+    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(2304, 1296))
     ret, frame = cam.get_frame()
     height, width = frame.shape[:2]
     cx = width // 2
