@@ -9,7 +9,7 @@ from logger import Logger
 import cv2
 
 if __name__ == '__main__':
-    COORD_ALPHA = 0.5
+    COORD_ALPHA = 0.9
     NAV_GAIN = 0
     KP_CH1 = 2000
     KP_CH2 = 2000
