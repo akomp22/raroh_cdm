@@ -24,7 +24,7 @@ if __name__ == '__main__':
     SAVE_DATA = False
 
 
-    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
+    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(320, 240))
     
     camera_matrix, dist_coeffs = Camera.read_params(folder = "params_rpi_0")
 
