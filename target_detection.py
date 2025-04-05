@@ -42,6 +42,8 @@ if __name__ == "__main__":
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
     ret, frame = cam.get_frame()
     height, width = frame.shape[:2]
+    cx = width // 2
+    cy = height // 2
     print(height, width)
     time.sleep(2)
 
@@ -59,7 +61,7 @@ if __name__ == "__main__":
     try:
         while True:
             ret, frame = cam.get_frame()
-            coord, mask_cleaned = find_red_spot_center(frame)
+            coord, mask_cleaned = find_red_spot_center(frame, cx, cy)
 
             frame_time = time.time()
             fps = 1.0 / (frame_time - start_time)
