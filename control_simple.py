@@ -9,7 +9,7 @@ from logger import Logger
 import cv2
 
 if __name__ == '__main__':
-    COORD_ALPHA = 0.99
+    COORD_ALPHA = 0.5
     NAV_GAIN = 0
     KP_CH1 = 2000
     KP_CH2 = 2000
@@ -45,10 +45,10 @@ if __name__ == '__main__':
     cy = 240
     print(f"fx: {fx}, fy: {fy}, cx: {cx}, cy: {cy}")
 
-    pid_ch1 = PIDFFController(Kp = KP_CH1, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode=None)
-    pid_ch2 = PIDFFController(Kp = KP_CH2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode=None)
+    pid_ch1 = PIDFFController(Kp = KP_CH1, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
+    pid_ch2 = PIDFFController(Kp = KP_CH2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
 
-    logger = Logger(base_log_dir="flight_logs")
+    # logger = Logger(base_log_dir="flight_logs")
     param_dict = {
         "Kp_ch1": KP_CH1,
         "Kp_ch2": KP_CH2,
@@ -134,15 +134,15 @@ if __name__ == '__main__':
 
             # PN system
             
-            d_error_ch1 = (angle_ch1_rad - angle_ch1_rad_prev)  / dt if dt > 0 else 0.0
-            d_error_ch2 = (angle_ch2_rad - angle_ch2_rad_prev)  / dt if dt > 0 else 0.0
+            # d_error_ch1 = (angle_ch1_rad - angle_ch1_rad_prev)  / dt if dt > 0 else 0.0
+            # d_error_ch2 = (angle_ch2_rad - angle_ch2_rad_prev)  / dt if dt > 0 else 0.0
 
-            pn_term_ch1 = -NAV_GAIN * d_error_ch1
-            pn_term_ch2 = -NAV_GAIN * d_error_ch2
-            cmd_ch1 += pn_term_ch1
-            cmd_ch2 += pn_term_ch2
-            angle_ch1_rad_prev = angle_ch1_rad
-            angle_ch2_rad_prev = angle_ch2_rad
+            # pn_term_ch1 = -NAV_GAIN * d_error_ch1
+            # pn_term_ch2 = -NAV_GAIN * d_error_ch2
+            # cmd_ch1 += pn_term_ch1
+            # cmd_ch2 += pn_term_ch2
+            # angle_ch1_rad_prev = angle_ch1_rad
+            # angle_ch2_rad_prev = angle_ch2_rad
 
             # execute command
             if REVERSED_CH1:
@@ -153,35 +153,35 @@ if __name__ == '__main__':
             cmd_ch2 = int(rc2_trim+cmd_ch2)
             cmd_ch1 = max(min(cmd_ch1, MAX_CH1), MIN_CH1)
             cmd_ch2 = max(min(cmd_ch2, MAX_CH2), MIN_CH1)
-            print(f"angle_x {np.rad2deg(angle_ch1_rad):.3f} angle_y_rad {np.rad2deg(angle_ch2_rad):.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}; fps {1/dt:.2f}")
+            print(f"x: {coord_filtered[0]}, y: {coord_filtered[1]}, angle_x {np.rad2deg(angle_ch1_rad):.3f} angle_y_rad {np.rad2deg(angle_ch2_rad):.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}; fps {1/dt:.2f}")
             mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_ch1, cmd_ch2])
 
-            if SAVE_DATA:
-                logger.add_scalar("cmd_ch1", cmd_ch1, n)
-                logger.add_scalar("cmd_ch2", cmd_ch2, n)
-                logger.add_scalar("angle_ch1_rad", angle_ch1_rad, n)
-                logger.add_scalar("angle_ch2_rad", angle_ch2_rad, n)
-                logger.add_scalar("coord_x", coord[0], n)
-                logger.add_scalar("coord_y", coord[1], n)
-                logger.add_scalar("coord_x_filtered", coord_filtered[0], n)
-                logger.add_scalar("coord_y_filtered", coord_filtered[1], n)
-                logger.add_scalar("aoa", aoa, n)
-                logger.add_scalar("ssa", ssa, n)
-                logger.add_scalar("pn_term_ch1", pn_term_ch1,n)
-                logger.add_scalar("pn_term_ch2", pn_term_ch2, n)
-                logger.add_scalar("d_error_ch1", d_error_ch1, n)
-                logger.add_scalar("d_error_ch2", d_error_ch2, n)
-                logger.add_scalar("dt", dt, n)
+            # if SAVE_DATA:
+            #     logger.add_scalar("cmd_ch1", cmd_ch1, n)
+            #     logger.add_scalar("cmd_ch2", cmd_ch2, n)
+            #     logger.add_scalar("angle_ch1_rad", angle_ch1_rad, n)
+            #     logger.add_scalar("angle_ch2_rad", angle_ch2_rad, n)
+            #     logger.add_scalar("coord_x", coord[0], n)
+            #     logger.add_scalar("coord_y", coord[1], n)
+            #     logger.add_scalar("coord_x_filtered", coord_filtered[0], n)
+            #     logger.add_scalar("coord_y_filtered", coord_filtered[1], n)
+            #     logger.add_scalar("aoa", aoa, n)
+            #     logger.add_scalar("ssa", ssa, n)
+            #     # logger.add_scalar("pn_term_ch1", pn_term_ch1,n)
+            #     # logger.add_scalar("pn_term_ch2", pn_term_ch2, n)
+            #     # logger.add_scalar("d_error_ch1", d_error_ch1, n)
+            #     # logger.add_scalar("d_error_ch2", d_error_ch2, n)
+            #     logger.add_scalar("dt", dt, n)
 
-                # # add coord to the frame
-                # if coord:
-                #     disp_coord = (int(coord[0] + cx), int(coord[1] + cy))
-                #     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
-                # # add frame number and timestamp
-                # label = f"Time: {time.time():.3f}"
-                # label += f"  |  Frame: {n}"
-                # cv2.putText(frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-                # logger.add_frame_to_video("frame", frame, fps=30)
+            #     # # add coord to the frame
+            #     # if coord:
+            #     #     disp_coord = (int(coord[0] + cx), int(coord[1] + cy))
+            #     #     cv2.circle(frame, disp_coord, 5, (0, 255, 0), -1)
+            #     # # add frame number and timestamp
+            #     # label = f"Time: {time.time():.3f}"
+            #     # label += f"  |  Frame: {n}"
+            #     # cv2.putText(frame, label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            #     # logger.add_frame_to_video("frame", frame, fps=30)
     except KeyboardInterrupt:
         logger.close()
         mavlink_wrapper.close()
