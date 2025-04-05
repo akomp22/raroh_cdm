@@ -21,7 +21,7 @@ if __name__ == '__main__':
     MAX_CH2 = 1800
     MIN_CH1 = 1200
 
-    SAVE_DATA = True
+    SAVE_DATA = False
 
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
