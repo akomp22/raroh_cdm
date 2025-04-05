@@ -27,13 +27,20 @@ if __name__ == '__main__':
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
     
     camera_matrix, dist_coeffs = Camera.read_params(folder = "params_rpi_0")
+
     # cam.init_undiostort(camera_matrix, dist_coeffs)
+    ret, frame = cam.get_frame()
+    height, width = frame.shape[:2]
+    cx = width // 2
+    cy = height // 2
 
     # optimalCameraMatrix = cam.optimalCameraMatrix
-    fx = camera_matrix[0, 0]
-    fy = camera_matrix[1, 1]
-    cx = camera_matrix[0, 2]
-    cy = camera_matrix[1, 2]
+    # fx = camera_matrix[0, 0]
+    # fy = camera_matrix[1, 1]
+    # cx = camera_matrix[0, 2]
+    # cy = camera_matrix[1, 2]
+    fx = 230
+    fy = 230
     cx = 320
     cy = 240
     print(f"fx: {fx}, fy: {fy}, cx: {cx}, cy: {cy}")
@@ -146,7 +153,7 @@ if __name__ == '__main__':
             cmd_ch2 = int(rc2_trim+cmd_ch2)
             cmd_ch1 = max(min(cmd_ch1, MAX_CH1), MIN_CH1)
             cmd_ch2 = max(min(cmd_ch2, MAX_CH2), MIN_CH1)
-            print(f"angle_x_rad {angle_ch1_rad:.3f} angle_y_rad {angle_ch2_rad:.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}; fps {1/dt:.2f}")
+            print(f"angle_x {np.deg2rad(angle_ch1_rad):.3f} angle_y_rad {np.deg2rad(angle_ch2_rad):.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}; fps {1/dt:.2f}")
             mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_ch1, cmd_ch2])
 
             if SAVE_DATA:
