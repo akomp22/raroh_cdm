@@ -50,11 +50,12 @@ class Camera():
                 self.resolution = (640, 480)
                 config = self.picam2.create_video_configuration(
                     main={"size": self.resolution, "format": "YUV420"},
+                    raw={"size": (2304, 1296)},
                     controls={"FrameRate": 120}
                 )
                 self.picam2.configure(config)
             print(self.picam2.camera_controls)
-            self.picam2.start()
+            self.picam2.start(show_preview=False)
             time.sleep(2)
 
     def release(self):
@@ -75,7 +76,7 @@ class Camera():
                 print("Error reading frame")
             return ret,frame
         elif self.type == 'rpi':
-            frame = self.picam2.capture_array('main')
+            frame = self.picam2.capture_array('main', wait=False, raw=False, format='YUV420')
             frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             # frame = frame[:480,:]
             return True, frame
