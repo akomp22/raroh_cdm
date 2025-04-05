@@ -132,10 +132,11 @@ if __name__ == "__main__":
     import sys
     import os
     # input_video = "data_inputs/1.mp4"
-    output_path = "flight_logs/video/"
+    current_time = time.strftime("%Y%m%d_%H%M%S")
+    output_path = f"flight_logs/video/{current_time}/"
     os.makedirs(output_path, exist_ok=True)
 
 
-    cam = Camera(type="rpi", camera_id="1", video_path=None, resolution=(640, 480))
-
+    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
+    print('Recording video...')
     record_video(cam, output_path, "test.avi", fps=30)
