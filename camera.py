@@ -137,6 +137,6 @@ if __name__ == "__main__":
     os.makedirs(output_path, exist_ok=True)
 
 
-    cam = Camera(type="rpi", camera_id="1", video_path=None, resolution=(640, 480))
+    cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(640, 480))
     print('Recording video...')
     record_video(cam, output_path, "test.avi", fps=30)
