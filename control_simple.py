@@ -11,8 +11,8 @@ import cv2
 if __name__ == '__main__':
     COORD_ALPHA = 0.99
     NAV_GAIN = 0
-    KP_CH1 = 8000
-    KP_CH2 = 8000
+    KP_CH1 = 6000
+    KP_CH2 = 6000
 
     REVERSED_CH1 = True
     REVERSED_CH2 = False
