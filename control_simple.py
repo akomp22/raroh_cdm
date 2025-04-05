@@ -61,7 +61,7 @@ if __name__ == '__main__':
         "max_ch2": MAX_CH2,
         "min_ch2": MIN_CH1
     }
-    logger.log_params(param_dict)
+    # logger.log_params(param_dict)
 
     connection_string = '/dev/ttyACM0'  
     # connection_string = "udpin:localhost:14551"
