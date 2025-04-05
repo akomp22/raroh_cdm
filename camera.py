@@ -105,70 +105,37 @@ class Camera():
         with open(f'{folder}/dist.pkl', 'rb') as f:
             dist = pickle.load(f)
         return cameraMatrix, dist
+    
+def record_video(cam, output_path, video_name, fps=30):
+    try:
+        os.makedirs(output_path, exist_ok=True)
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')  # Codec for AVI format
+        out = cv2.VideoWriter(output_path + video_name, fourcc, fps, cam.resolution)
+        n = 0
+        while True:
+            n += 1
+            ret, frame = cam.get_frame()
+            if not ret:
+                break
+            # add timestamp and n to the frame
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            cv2.putText(frame, f"{timestamp}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            cv2.putText(frame, f"{n}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            out.write(frame)
+        out.release()
+    except Exception as e:
+        print(f"Error recording video: {e}")
+        out.release()
 
 
 if __name__ == "__main__":
     import sys
-    input_video = "data_inputs/1.mp4"
-    output_video = "data_outputs/1.avi"
-
-    cam = Camera(type="windows",video_path=input_video, camera_id="1", resolution=(640, 320))
-
-    matrix, dist = cam.read_params(folder = "params_rpi_0")
-    # cam.init_undiostort(matrix, dist)
-    # camera_matrix = cam.optimalCameraMatrix
-    fx = matrix[0, 0]
-    fy = matrix[1, 1]
-    cx = matrix[0, 2]
-    cy = matrix[1, 2]
-    print(f"fx: {fx}, fy: {fy}, cx: {cx}, cy: {cy}")
-
-    ret, frame = cam.get_frame()
-    if not ret:
-        print("Error: Could not read first frame.")
-        cam.release()
-        sys.exit(1)
-
-    # Get frame width & height dynamically
-    frame_width = int(cam.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(cam.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps = int(cam.cap.get(cv2.CAP_PROP_FPS) or 25)  # Default to 25 FPS if unknown
-
-    # Define VideoWriter codec and output file
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # XVID for AVI format
-    out = cv2.VideoWriter(output_video, fourcc, fps, (320, 240))
-
-    print(f"Recording started: {output_video} ({frame_width}x{frame_height} @ {fps} FPS)")
+    import os
+    # input_video = "data_inputs/1.mp4"
+    output_path = "flight_logs/video/"
+    os.makedirs(output_path, exist_ok=True)
 
 
-    import time
+    cam = Camera(type="rpi", camera_id="1", video_path=None, resolution=(640, 480))
 
-    try:
-        frame_count = 0
-        start_time = time.time()
-
-        while True:
-            ret, frame = cam.get_frame()
-            
-            if not ret:
-                print("Error reading frame")
-                break
-            
-            out.write(frame)  # Save frame to video file
-            frame_count += 1
-
-            # Print FPS every second
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= 1.0:
-                fps = frame_count / elapsed_time
-                print(f"FPS: {fps:.2f}")
-                frame_count = 0
-                start_time = time.time()
-
-    except KeyboardInterrupt:
-        print("\nRecording interrupted by user.")
-
-    finally:
-        print("Recording stopped.")
-        cam.release()
-        out.release()
+    record_video(cam, output_path, "test.avi", fps=30)

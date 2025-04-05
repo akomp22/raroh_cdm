@@ -16,9 +16,9 @@ if __name__ == '__main__':
 
     REVERSED_CH1 = True
     REVERSED_CH2 = False
-    MAC_CH1 = 1800
+    MAX_CH1 = 1800
     MIN_CH1 = 1200 
-    MAC_CH2 = 1800
+    MAX_CH2 = 1800
     MIN_CH1 = 1200
 
     SAVE_DATA = True
@@ -38,8 +38,8 @@ if __name__ == '__main__':
     cy = 240
     print(f"fx: {fx}, fy: {fy}, cx: {cx}, cy: {cy}")
 
-    pid_ch1 = PIDFFController(Kp = KP_CH1, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
-    pid_ch2 = PIDFFController(Kp = KP_CH2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode='squared')
+    pid_ch1 = PIDFFController(Kp = KP_CH1, Ki = 0,Kd = 0, Kff = 0, i_max = 1, nonlinear_mode=None)
+    pid_ch2 = PIDFFController(Kp = KP_CH2, Ki = 0, Kd = 0, Kff = 0, i_max = 1, nonlinear_mode=None)
 
     logger = Logger(base_log_dir="flight_logs")
     param_dict = {
@@ -49,9 +49,9 @@ if __name__ == '__main__':
         "nav_gain": NAV_GAIN,
         "reversed_ch1": REVERSED_CH1,
         "reversed_ch2": REVERSED_CH2,
-        "max_ch1": MAC_CH1,
+        "max_ch1": MAX_CH1,
         "min_ch1": MIN_CH1,
-        "max_ch2": MAC_CH2,
+        "max_ch2": MAX_CH2,
         "min_ch2": MIN_CH1
     }
     logger.log_params(param_dict)
@@ -72,6 +72,7 @@ if __name__ == '__main__':
         1500, 1500, 1500, 1500, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0  # Fill rest with zeros
     )
+
     ##################################################
     # rc1_trim = mavlink_wrapper.read_parameter('RC1_TRIM')
     # rc2_trim = mavlink_wrapper.read_parameter('RC2_TRIM')
@@ -143,8 +144,8 @@ if __name__ == '__main__':
                 cmd_ch2 = -cmd_ch2
             cmd_ch1 = int(rc1_trim+cmd_ch1)
             cmd_ch2 = int(rc2_trim+cmd_ch2)
-            cmd_ch1 = max(min(cmd_ch1, MAC_CH1), MIN_CH1)
-            cmd_ch2 = max(min(cmd_ch2, MAC_CH2), MIN_CH1)
+            cmd_ch1 = max(min(cmd_ch1, MAX_CH1), MIN_CH1)
+            cmd_ch2 = max(min(cmd_ch2, MAX_CH2), MIN_CH1)
             print(f"angle_x_rad {angle_ch1_rad:.3f} angle_y_rad {angle_ch2_rad:.3f}; cmd x {cmd_ch1}; cmd y {cmd_ch2}; fps {1/dt:.2f}")
             mavlink_wrapper.set_rc_channel_pwm([1,2], [cmd_ch1, cmd_ch2])
 
