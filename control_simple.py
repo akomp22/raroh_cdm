@@ -21,7 +21,7 @@ if __name__ == '__main__':
     MAX_CH2 = 1800
     MIN_CH1 = 1200
 
-    SAVE_DATA = False
+    SAVE_DATA = True
 
 
     cam = Camera(type="rpi", camera_id="/dev/video0", video_path=None, resolution=(320, 240))
@@ -136,8 +136,8 @@ if __name__ == '__main__':
             d_error_ch1 = (angle_ch1_rad - angle_ch1_rad_prev)  / dt if dt > 0 else 0.0
             d_error_ch2 = (angle_ch2_rad - angle_ch2_rad_prev)  / dt if dt > 0 else 0.0
 
-            pn_term_ch1 = -NAV_GAIN * d_error_ch1
-            pn_term_ch2 = -NAV_GAIN * d_error_ch2
+            pn_term_ch1 = NAV_GAIN * d_error_ch1
+            pn_term_ch2 = NAV_GAIN * d_error_ch2
             cmd_ch1 += pn_term_ch1
             cmd_ch2 += pn_term_ch2
             angle_ch1_rad_prev = angle_ch1_rad
