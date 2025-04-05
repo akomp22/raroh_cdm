@@ -20,15 +20,17 @@ def find_red_spot_center(frame, cx, cy):
     # mask_cleaned = cv2.morphologyEx(mask_cleaned, cv2.MORPH_CLOSE, kernel)
     mask_cleaned = mask
 
-    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask_cleaned)
+    contours, _ = cv2.findContours(mask_cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = [cnt for cnt in contours if cv2.contourArea(cnt) > 100]
 
-    # Skip background label 0
-    if num_labels > 1:
-        # Get the index of the largest component (excluding background)
-        largest_idx = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
-        center_x, center_y = centroids[largest_idx]
-        return (int(center_x) - cx, int(center_y) - cy), mask_cleaned
-
+    if contours:
+        largest = max(contours, key=cv2.contourArea)
+        M = cv2.moments(largest)
+        if M["m00"] != 0:
+            x = int(M["m10"] / M["m00"])
+            y = int(M["m01"] / M["m00"])
+            # height, width = frame.shape[:2]
+            return (x - cx, y - cy), mask_cleaned
     return None, mask_cleaned
 
 if __name__ == "__main__":
