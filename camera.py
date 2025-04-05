@@ -39,7 +39,7 @@ class Camera():
             self.picam2 = Picamera2()
             try:
                 config = self.picam2.create_video_configuration(
-                    main={"size": self.resolution, "format": "YUV420"},
+                    main={"size": (320, 240), "format": "RGB888"},
                     raw={"size": (2304, 1296)},
                     controls={"FrameRate": 120}
                 )
