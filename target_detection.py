@@ -5,10 +5,10 @@ from camera import Camera
 def find_red_spot_center(frame, cx, cy):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    lower_red1 = np.array([0, 120, 90])
-    upper_red1 = np.array([5, 255, 255])
-    lower_red2 = np.array([175, 150, 150])
-    upper_red2 = np.array([180, 255, 255])
+    lower_red1 = np.array([5, 120, 90])
+    upper_red1 = np.array([15, 255, 255])
+    lower_red2 = np.array([15, 150, 150])
+    upper_red2 = np.array([25, 255, 255])
 
 
     mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
